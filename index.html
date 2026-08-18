@@ -1,0 +1,1398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ECC PH Training Department</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#172033;
+  --paper:#F6F4EE;
+  --panel:#FFFFFF;
+  --gold:#B4832A;
+  --gold-soft:#F1E4C8;
+  --teal:#2F6F62;
+  --teal-soft:#E1EEE9;
+  --rust:#B54A24;
+  --rust-soft:#F5E1D6;
+  --border:#E5E0D3;
+  --text:#20263A;
+  --muted:#726B5C;
+  --shadow: 0 1px 2px rgba(23,32,51,.04), 0 6px 20px rgba(23,32,51,.06);
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  font-family:'Inter',sans-serif;
+  background:var(--paper);
+  color:var(--text);
+  min-height:100vh;
+  display:flex;
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3,.serif{font-family:'Fraunces',serif;}
+.mono{font-family:'IBM Plex Mono',monospace;}
+::selection{background:var(--gold-soft);}
+
+/* ---------- Layout ---------- */
+#sidebar{
+  width:238px;
+  flex:none;
+  background:var(--ink);
+  color:#EDE9DD;
+  display:flex;
+  flex-direction:column;
+  padding:22px 14px;
+  min-height:100vh;
+  position:sticky;
+  top:0;
+}
+#sidebar .brand{
+  padding:2px 10px 20px 10px;
+  border-bottom:1px solid rgba(237,233,221,.12);
+  margin-bottom:14px;
+}
+#sidebar .brand .mark{
+  font-family:'Fraunces',serif;
+  font-size:20px;
+  font-weight:600;
+  letter-spacing:.2px;
+  color:#F5EFDD;
+}
+#sidebar .brand .sub{
+  font-size:10.5px;
+  text-transform:uppercase;
+  letter-spacing:1.6px;
+  color:var(--gold-soft);
+  margin-top:4px;
+  opacity:.85;
+}
+.navgroup{margin-bottom:6px;}
+.navgroup-label{
+  font-size:10px;
+  text-transform:uppercase;
+  letter-spacing:1.4px;
+  color:#8E93A6;
+  padding:14px 12px 6px;
+}
+.navitem{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:9px 12px;
+  border-radius:8px;
+  font-size:13.5px;
+  color:#D7D3C4;
+  cursor:pointer;
+  transition:background .12s ease, color .12s ease;
+  user-select:none;
+}
+.navitem:hover{background:rgba(237,233,221,.08);}
+.navitem.active{background:var(--gold);color:#20263A;font-weight:600;}
+.navitem .ic{width:16px;text-align:center;font-size:13px;opacity:.9;}
+#sidebar .foot{
+  margin-top:auto;
+  padding:12px;
+  font-size:10.5px;
+  color:#7E839A;
+  line-height:1.5;
+  border-top:1px solid rgba(237,233,221,.1);
+}
+
+#main{flex:1;min-width:0;padding:30px 34px 60px;}
+.view{display:none;}
+.view.active{display:block;}
+
+.pagehead{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:20px;gap:16px;flex-wrap:wrap;}
+.pagehead h1{font-size:26px;margin:0 0 4px;font-weight:600;color:var(--ink);}
+.pagehead .desc{color:var(--muted);font-size:13.5px;max-width:560px;}
+.pagehead .actions{display:flex;gap:8px;}
+
+/* ---------- Buttons / inputs ---------- */
+button{font-family:inherit;cursor:pointer;}
+.btn{
+  border:1px solid var(--border);
+  background:var(--panel);
+  color:var(--text);
+  padding:8px 14px;
+  border-radius:8px;
+  font-size:13px;
+  font-weight:600;
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  transition:border-color .12s ease, transform .1s ease;
+}
+.btn:hover{border-color:#c9c2ab;}
+.btn:active{transform:scale(.98);}
+.btn-primary{background:var(--ink);color:#F5EFDD;border-color:var(--ink);}
+.btn-primary:hover{background:#0f1526;}
+.btn-gold{background:var(--gold);color:#20263A;border-color:var(--gold);}
+.btn-ghost{background:transparent;border-color:transparent;color:var(--muted);}
+.btn-danger{color:var(--rust);}
+.btn-sm{padding:5px 10px;font-size:12px;border-radius:7px;}
+
+input,select,textarea{
+  font-family:inherit;
+  font-size:13.5px;
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:8px 10px;
+  background:#fff;
+  color:var(--text);
+  width:100%;
+}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--gold-soft);border-color:var(--gold);}
+label.field{display:block;margin-bottom:12px;}
+label.field .lbl{display:block;font-size:11.5px;font-weight:600;color:var(--muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px;}
+
+/* ---------- Cards / grid ---------- */
+.grid{display:grid;gap:16px;}
+.grid-4{grid-template-columns:repeat(4,1fr);}
+.grid-3{grid-template-columns:repeat(3,1fr);}
+.grid-2{grid-template-columns:repeat(2,1fr);}
+@media(max-width:1100px){.grid-4{grid-template-columns:repeat(2,1fr);}.grid-3{grid-template-columns:repeat(2,1fr);}}
+
+.card{
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:18px 20px;
+  box-shadow:var(--shadow);
+}
+.stat{padding:16px 18px;}
+.stat .k{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);font-weight:600;}
+.stat .v{font-family:'Fraunces',serif;font-size:30px;font-weight:600;color:var(--ink);margin-top:6px;}
+.stat .d{font-size:12px;color:var(--teal);margin-top:4px;font-weight:600;}
+.stat .d.warn{color:var(--rust);}
+
+.section-title{font-size:15px;font-weight:700;margin:0 0 12px;color:var(--ink);display:flex;align-items:center;justify-content:space-between;}
+
+/* ---------- Tables ---------- */
+table{width:100%;border-collapse:collapse;font-size:13px;}
+thead th{
+  text-align:left;
+  font-size:10.5px;
+  text-transform:uppercase;
+  letter-spacing:.6px;
+  color:var(--muted);
+  padding:9px 10px;
+  border-bottom:1px solid var(--border);
+  font-weight:700;
+}
+tbody td{padding:10px 10px;border-bottom:1px solid #EFEBDF;vertical-align:middle;}
+tbody tr{cursor:pointer;transition:background .1s;}
+tbody tr:hover{background:#FAF7EF;}
+tbody tr:last-child td{border-bottom:none;}
+.table-wrap{overflow-x:auto;}
+
+.pill{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:3px 9px;border-radius:100px;font-size:11px;font-weight:700;
+  white-space:nowrap;
+}
+.pill-gold{background:var(--gold-soft);color:#7A5B15;}
+.pill-teal{background:var(--teal-soft);color:var(--teal);}
+.pill-rust{background:var(--rust-soft);color:var(--rust);}
+.pill-grey{background:#ECE9DF;color:#665F52;}
+.dot{width:7px;height:7px;border-radius:50%;display:inline-block;}
+
+.toolbar{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center;}
+.toolbar input[type=text],.toolbar input[type=search]{max-width:220px;}
+.toolbar select{max-width:170px;}
+.count-chip{font-size:11.5px;color:var(--muted);margin-left:auto;font-weight:600;}
+
+/* ---------- Modal ---------- */
+.overlay{
+  position:fixed;inset:0;background:rgba(23,32,51,.42);
+  display:none;align-items:flex-start;justify-content:center;
+  padding:40px 20px;overflow-y:auto;z-index:50;
+}
+.overlay.active{display:flex;}
+.modal{
+  background:#fff;border-radius:16px;max-width:560px;width:100%;
+  padding:26px 28px 22px;box-shadow:0 20px 60px rgba(0,0,0,.25);
+  animation:pop .14s ease;
+}
+@keyframes pop{from{transform:translateY(6px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
+.modal-head h3{margin:0;font-size:18px;}
+.modal-close{cursor:pointer;color:var(--muted);font-size:20px;line-height:1;background:none;border:none;padding:4px;}
+.modal-foot{display:flex;justify-content:space-between;margin-top:18px;padding-top:14px;border-top:1px solid var(--border);}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:0 14px;}
+
+/* ---------- Pipeline funnel (signature element) ---------- */
+.funnel{display:flex;align-items:stretch;gap:2px;margin-top:6px;}
+.funnel-seg{
+  flex:1;position:relative;padding:16px 8px 14px;text-align:center;
+  color:#fff;font-size:11px;font-weight:600;
+  clip-path:polygon(10px 0,100% 0,calc(100% - 10px) 100%,0 100%);
+}
+.funnel-seg:first-child{clip-path:polygon(0 0,100% 0,calc(100% - 10px) 100%,0 100%);}
+.funnel-seg .n{font-family:'Fraunces',serif;font-size:22px;display:block;margin-bottom:2px;}
+.funnel-seg .lbl{opacity:.92;font-size:9.5px;text-transform:uppercase;letter-spacing:.4px;}
+
+/* ---------- WIG progress ---------- */
+.wig-bar-track{height:14px;border-radius:100px;background:#ECE7D8;overflow:hidden;position:relative;}
+.wig-bar-fill{height:100%;background:linear-gradient(90deg,var(--gold),#D9AC55);border-radius:100px;}
+
+/* ---------- Kanban (leadership pipeline board) ---------- */
+.kanban{display:flex;gap:12px;overflow-x:auto;padding-bottom:8px;}
+.kanban-col{background:#F1EDE1;border-radius:12px;padding:10px;min-width:190px;flex:none;}
+.kanban-col h4{font-size:11.5px;margin:2px 6px 8px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);display:flex;justify-content:space-between;}
+.kanban-card{background:#fff;border:1px solid var(--border);border-radius:9px;padding:9px 10px;margin-bottom:8px;font-size:12.5px;cursor:pointer;box-shadow:var(--shadow);}
+.kanban-card .nm{font-weight:700;margin-bottom:2px;}
+.kanban-card .meta{color:var(--muted);font-size:11px;}
+
+/* ---------- Progress bar (LMS) ---------- */
+.prog-track{height:8px;background:#ECE7D8;border-radius:100px;overflow:hidden;}
+.prog-fill{height:100%;background:var(--teal);border-radius:100px;}
+
+.empty{padding:34px 20px;text-align:center;color:var(--muted);font-size:13px;border:1.5px dashed var(--border);border-radius:12px;}
+.tag-list{display:flex;gap:6px;flex-wrap:wrap;}
+.small{font-size:11.5px;color:var(--muted);}
+a.link{color:var(--teal);text-decoration:none;font-weight:600;}
+hr.rule{border:none;border-top:1px solid var(--border);margin:18px 0;}
+
+.callout{
+  border-radius:12px;padding:12px 14px;font-size:12.8px;display:flex;gap:10px;align-items:flex-start;
+}
+.callout-teal{background:var(--teal-soft);color:#1F4E44;}
+.callout-rust{background:var(--rust-soft);color:#7C3416;}
+.callout-gold{background:var(--gold-soft);color:#6E5211;}
+
+textarea{min-height:74px;resize:vertical;}
+.toast{
+  position:fixed;bottom:22px;right:22px;background:var(--ink);color:#F5EFDD;
+  padding:10px 16px;border-radius:9px;font-size:13px;font-weight:600;
+  box-shadow:0 8px 24px rgba(0,0,0,.25);z-index:80;opacity:0;transform:translateY(8px);
+  transition:opacity .18s,transform .18s;pointer-events:none;
+}
+.toast.show{opacity:1;transform:translateY(0);}
+</style>
+</head>
+<body>
+
+<nav id="sidebar">
+  <div class="brand">
+    <div class="mark">ECC PH</div>
+    <div class="sub">Training Department</div>
+  </div>
+
+  <div class="navgroup">
+    <div class="navitem active" data-view="dashboard"><span class="ic">&#9678;</span> Command Center</div>
+  </div>
+
+  <div class="navgroup">
+    <div class="navgroup-label">Relational Hub</div>
+    <div class="navitem" data-view="people"><span class="ic">&#128100;</span> People</div>
+    <div class="navitem" data-view="churches"><span class="ic">&#9962;</span> Churches</div>
+    <div class="navitem" data-view="pipeline"><span class="ic">&#8599;</span> Discipleship Pipeline</div>
+  </div>
+
+  <div class="navgroup">
+    <div class="navgroup-label">Operations</div>
+    <div class="navitem" data-view="lms"><span class="ic">&#127891;</span> Trainings &amp; LMS</div>
+    <div class="navitem" data-view="activities"><span class="ic">&#128221;</span> Activities &amp; Follow-ups</div>
+    <div class="navitem" data-view="teams"><span class="ic">&#128506;</span> Provinces &amp; Teams</div>
+  </div>
+
+  <div class="navgroup">
+    <div class="navgroup-label">Strategy</div>
+    <div class="navitem" data-view="wig"><span class="ic">&#127919;</span> WIG</div>
+    <div class="navitem" data-view="reports"><span class="ic">&#128203;</span> Reports (EMS)</div>
+  </div>
+
+  <div class="navgroup">
+    <div class="navitem" onclick="exportData()"><span class="ic">&#8681;</span> Export Data (.json)</div>
+    <div class="navitem" onclick="document.getElementById('import-file').click()"><span class="ic">&#8679;</span> Import Data</div>
+    <input type="file" id="import-file" accept="application/json" style="display:none" onchange="importData(event)">
+  </div>
+
+  <div class="foot">Living Faith. Leading Purpose.<br>Empowering Lives.<br><br>Data is saved to this browser only. Export regularly to back up or move it to another device.</div>
+</nav>
+
+<main id="main">
+
+  <!-- ============ DASHBOARD ============ -->
+  <section class="view active" id="view-dashboard">
+    <div class="pagehead">
+      <div>
+        <h1>Command Center</h1>
+        <div class="desc">National overview — where people, churches, facilitators and the WIG stand today.</div>
+      </div>
+    </div>
+
+    <div class="grid grid-4" id="dash-stats" style="margin-bottom:18px;"></div>
+
+    <div class="card" style="margin-bottom:18px;">
+      <div class="section-title">Leadership Pipeline <span class="small" id="pipeline-total-lbl"></span></div>
+      <div class="funnel" id="dash-funnel"></div>
+    </div>
+
+    <div class="grid grid-2" style="align-items:start;">
+      <div class="card">
+        <div class="section-title">WIG — Active Facilitators <a class="link small" data-goto="wig">View WIG →</a></div>
+        <div id="dash-wig"></div>
+      </div>
+      <div class="card">
+        <div class="section-title">Needs Attention</div>
+        <div id="dash-risks"></div>
+      </div>
+    </div>
+
+    <div class="grid grid-2" style="margin-top:18px;align-items:start;">
+      <div class="card">
+        <div class="section-title">Province Health <a class="link small" data-goto="teams">All provinces →</a></div>
+        <div class="table-wrap" id="dash-provinces"></div>
+      </div>
+      <div class="card">
+        <div class="section-title">Upcoming Trainings <a class="link small" data-goto="lms">All trainings →</a></div>
+        <div id="dash-trainings"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PEOPLE ============ -->
+  <section class="view" id="view-people">
+    <div class="pagehead">
+      <div>
+        <h1>People</h1>
+        <div class="desc">The relational hub of the CRM. Every church, training and follow-up connects back here.</div>
+      </div>
+      <div class="actions"><button class="btn btn-primary" onclick="openPersonForm()">+ Add Person</button></div>
+    </div>
+    <div class="toolbar">
+      <input type="search" id="people-search" placeholder="Search name, role, church…" oninput="renderPeople()">
+      <select id="people-filter-stage" onchange="renderPeople()"><option value="">All pipeline stages</option></select>
+      <select id="people-filter-province" onchange="renderPeople()"><option value="">All provinces</option></select>
+      <span class="count-chip" id="people-count"></span>
+    </div>
+    <div class="card"><div class="table-wrap"><table id="people-table"><thead><tr>
+      <th>Name</th><th>Pipeline Stage</th><th>Church</th><th>Province</th><th>Facilitator Status</th><th>Last Contact</th><th>Next Follow-up</th>
+    </tr></thead><tbody></tbody></table></div></div>
+  </section>
+
+  <!-- ============ CHURCHES ============ -->
+  <section class="view" id="view-churches">
+    <div class="pagehead">
+      <div>
+        <h1>Churches</h1>
+        <div class="desc">Every church and ministry community, from first contact to multiplying.</div>
+      </div>
+      <div class="actions"><button class="btn btn-primary" onclick="openChurchForm()">+ Add Church</button></div>
+    </div>
+    <div class="toolbar">
+      <input type="search" id="church-search" placeholder="Search church, pastor…" oninput="renderChurches()">
+      <select id="church-filter-status" onchange="renderChurches()"><option value="">All statuses</option></select>
+      <span class="count-chip" id="church-count"></span>
+    </div>
+    <div class="grid grid-3" id="church-grid"></div>
+  </section>
+
+  <!-- ============ DISCIPLESHIP PIPELINE ============ -->
+  <section class="view" id="view-pipeline">
+    <div class="pagehead">
+      <div>
+        <h1>Discipleship Pipeline</h1>
+        <div class="desc">A standalone log of leadership-stage changes over time — kept separate from People so history is never overwritten.</div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:18px;">
+      <div class="section-title">Stage Distribution</div>
+      <div class="kanban" id="pipeline-board"></div>
+    </div>
+    <div class="card">
+      <div class="section-title">Stage-Change History</div>
+      <div class="table-wrap"><table><thead><tr><th>Date</th><th>Person</th><th>From</th><th>To</th><th>Note</th></tr></thead>
+      <tbody id="pipeline-log-body"></tbody></table></div>
+    </div>
+  </section>
+
+  <!-- ============ LMS ============ -->
+  <section class="view" id="view-lms">
+    <div class="pagehead">
+      <div>
+        <h1>Trainings &amp; LMS</h1>
+        <div class="desc">Module catalog, training events, enrollment and completion tracking.</div>
+      </div>
+      <div class="actions">
+        <button class="btn" onclick="openModuleForm()">+ Add Module</button>
+        <button class="btn btn-primary" onclick="openEventForm()">+ Schedule Training</button>
+      </div>
+    </div>
+
+    <div class="section-title" style="margin-top:4px;">Module Catalog</div>
+    <div class="grid grid-3" id="module-grid" style="margin-bottom:22px;"></div>
+
+    <div class="section-title">Training Calendar</div>
+    <div class="toolbar">
+      <select id="event-filter-status" onchange="renderEvents()"><option value="">All statuses</option></select>
+      <span class="count-chip" id="event-count"></span>
+    </div>
+    <div class="card"><div class="table-wrap"><table><thead><tr>
+      <th>Training</th><th>Module</th><th>Date</th><th>Province</th><th>Lead Facilitator</th><th>Participants</th><th>Status</th>
+    </tr></thead><tbody id="event-table-body"></tbody></table></div></div>
+
+    <div class="section-title" style="margin-top:22px;">Facilitator Readiness (Core Modules)</div>
+    <div class="card"><div class="table-wrap"><table><thead><tr><th>Person</th><th>Facilitator Status</th><th>Core Modules Completed</th><th>Progress</th></tr></thead>
+    <tbody id="readiness-body"></tbody></table></div></div>
+  </section>
+
+  <!-- ============ ACTIVITIES ============ -->
+  <section class="view" id="view-activities">
+    <div class="pagehead">
+      <div>
+        <h1>Activities &amp; Follow-ups</h1>
+        <div class="desc">The operational heartbeat — coaching, visits, meetings and follow-up tasks that drive last-contact.</div>
+      </div>
+      <div class="actions"><button class="btn btn-primary" onclick="openActivityForm()">+ Log Activity</button></div>
+    </div>
+    <div class="toolbar">
+      <select id="activity-filter-type" onchange="renderActivities()"><option value="">All types</option></select>
+      <select id="activity-filter-status" onchange="renderActivities()"><option value="">All statuses</option></select>
+      <label style="display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--muted);"><input type="checkbox" id="activity-filter-overdue" style="width:auto" onchange="renderActivities()"> Overdue only</label>
+      <span class="count-chip" id="activity-count"></span>
+    </div>
+    <div class="card"><div class="table-wrap"><table><thead><tr>
+      <th>Type</th><th>Person</th><th>Church</th><th>Date</th><th>Due</th><th>Priority</th><th>Owner</th><th>Status</th>
+    </tr></thead><tbody id="activity-table-body"></tbody></table></div></div>
+  </section>
+
+  <!-- ============ TEAMS/REGIONS ============ -->
+  <section class="view" id="view-teams">
+    <div class="pagehead">
+      <div>
+        <h1>Provinces &amp; Teams</h1>
+        <div class="desc">Regional coordination — provinces roll up into districts and core teams.</div>
+      </div>
+    </div>
+    <div class="grid grid-2" style="margin-bottom:18px;">
+      <div class="card"><div class="section-title">Districts</div><div id="districts-list"></div></div>
+      <div class="card"><div class="section-title">Core Teams</div><div id="coreteams-list"></div></div>
+    </div>
+    <div class="card">
+      <div class="section-title">Province Overview</div>
+      <div class="table-wrap"><table><thead><tr>
+        <th>Province</th><th>District</th><th>Core Team</th><th>Churches</th><th>People</th><th>Active Facilitators</th>
+      </tr></thead><tbody id="province-table-body"></tbody></table></div>
+    </div>
+  </section>
+
+  <!-- ============ WIG ============ -->
+  <section class="view" id="view-wig">
+    <div class="pagehead">
+      <div>
+        <h1>WIG — Wildly Important Goal</h1>
+        <div class="desc" id="wig-desc"></div>
+      </div>
+    </div>
+    <div class="grid grid-4" id="wig-stats" style="margin-bottom:18px;"></div>
+    <div class="card" style="margin-bottom:18px;">
+      <div class="section-title">Overall Progress</div>
+      <div class="wig-bar-track" style="margin:8px 0 6px;"><div class="wig-bar-fill" id="wig-bar" style="width:0%"></div></div>
+      <div class="small" id="wig-bar-label"></div>
+    </div>
+    <div class="grid grid-2" style="align-items:start;">
+      <div class="card">
+        <div class="section-title">Lead Measures</div>
+        <div id="wig-lead-measures"></div>
+      </div>
+      <div class="card">
+        <div class="section-title">Progress by Province</div>
+        <div class="table-wrap" id="wig-province-table"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ REPORTS ============ -->
+  <section class="view" id="view-reports">
+    <div class="pagehead">
+      <div>
+        <h1>Monthly Report (EMS)</h1>
+        <div class="desc">Encouraging testimonies · Matters to address · Strategic next steps — pulled from live CRM data.</div>
+      </div>
+      <div class="actions"><button class="btn btn-primary" onclick="window.print()">Print / Save PDF</button></div>
+    </div>
+
+    <div class="card" style="margin-bottom:18px;">
+      <div class="grid grid-4" id="report-stats"></div>
+    </div>
+
+    <div class="card" style="margin-bottom:18px;">
+      <div class="section-title">E — Encouraging Testimonies</div>
+      <textarea id="report-e" placeholder="What is God doing? Add a story or highlight…" style="min-height:90px;" oninput="saveReportText()"></textarea>
+    </div>
+
+    <div class="card" style="margin-bottom:18px;">
+      <div class="section-title">M — Matters to Address</div>
+      <div id="report-matters"></div>
+    </div>
+
+    <div class="card">
+      <div class="section-title">S — Strategic Next Steps</div>
+      <div id="report-strategic"></div>
+    </div>
+  </section>
+
+</main>
+
+<div class="overlay" id="overlay"><div class="modal" id="modal-content"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* =========================================================================
+   REFERENCE DATA
+   ========================================================================= */
+const PIPELINE_STAGES = ["Contact","Participant","Learner","Emerging Leader","Facilitator","Team Leader","Multiplying Leader"];
+const FAC_STATUSES = ["Active","Developing","New","Inactive","Re-engagement",""];
+const CHURCH_STATUSES = ["Prospect","Connected","Emerging","Growing","Mature","Multiplying","Inactive"];
+const PERSON_STATUSES = ["Active","Inactive","Needs Verification"];
+const ACTIVITY_TYPES = ["Coaching","Follow-up","Church Visit","Training","Meeting","Prayer","Recruitment"];
+const ACTIVITY_STATUSES = ["Not Started","In Progress","Waiting","Completed","Cancelled"];
+const PRIORITIES = ["Critical","High","Normal","Low"];
+const EVENT_STATUSES = ["Planned","Confirmed","Ongoing","Completed","Report Pending","Closed"];
+const MODULE_CATEGORIES = ["Discipleship","Facilitator Development","Church Planting","Coaching"];
+const CORE_MODULES = ["DMJ Module 1","DMJ Module 2","DMJ Module 3","DMJ Module 4","IAL"];
+
+const PROVINCES_SEED = [
+  {name:"Leyte", district:"District 3 — Chat", coreTeam:"Team Morex"},
+  {name:"Eastern Samar", district:"District 3 — Chat", coreTeam:"Team Morex"},
+  {name:"Western Samar", district:"District 3 — Chat", coreTeam:"Team Morex"},
+  {name:"Northern Samar", district:"District 3 — Chat", coreTeam:"Team Morex"},
+  {name:"Pangasinan", district:"District 1 — Jerry", coreTeam:"Team Karl"},
+  {name:"Tarlac", district:"District 1 — Jerry", coreTeam:"Team Karl"},
+  {name:"Aurora", district:"District 1 — Jerry", coreTeam:"Team Karl"},
+  {name:"Nueva Ecija", district:"District 1 — Jerry", coreTeam:"Team Karl"},
+  {name:"Quezon", district:"District 1 — Jerry", coreTeam:"Team Juliet"},
+  {name:"Camarines Sur", district:"District 1 — Jerry", coreTeam:"Team Juliet"},
+  {name:"La Union", district:"District 2 — Emil G.", coreTeam:"Team Jun"},
+  {name:"Palawan", district:"District 2 — Emil G.", coreTeam:"Team Jun"},
+  {name:"Oriental Mindoro", district:"District 2 — Emil G.", coreTeam:"Team Jun"},
+  {name:"Occidental Mindoro", district:"District 2 — Emil G.", coreTeam:"Team Jun"},
+  {name:"Albay", district:"District 3 — Chat", coreTeam:"Team Juliet"},
+  {name:"Zambales", district:"District 1 — Jerry", coreTeam:"Team Juliet"},
+  {name:"Rizal", district:"District 3 — Chat", coreTeam:"Team Juliet"},
+];
+const DISTRICTS = [
+  {name:"District 1 — Jerry", provinces:["Aurora","Nueva Ecija","Quezon","Camarines Sur"]},
+  {name:"District 2 — Emil G.", provinces:["La Union","Palawan","Oriental Mindoro","Occidental Mindoro"]},
+  {name:"District 3 — Chat", provinces:["Rizal","Albay","Zambales"]},
+];
+const CORE_TEAMS = [
+  {name:"Team Karl", provinces:["Pangasinan","Nueva Ecija","Aurora"]},
+  {name:"Team Morex", provinces:["Northern Samar","Western Samar","Eastern Samar"]},
+  {name:"Team Jun", provinces:["La Union","Palawan","Oriental Mindoro","Occidental Mindoro"]},
+  {name:"Team Juliet", provinces:["Camarines Sur","Quezon","Zambales"]},
+];
+const WIG = {
+  label:"Increase active facilitators from 71 across 17 provinces to 156 by January 31, 2027.",
+  start:71, target:156, deadline:"2027-01-31",
+  leadMeasures:[
+    {name:"Recruit", detail:"Recruit 5 new facilitators per province in coordination with CMFs.", target:85, key:"recruited"},
+    {name:"Train", detail:"Facilitators completing IAL and core modules.", target:85, key:"trained"},
+    {name:"Deploy", detail:"Facilitators deployed within 90 days of completing IAL.", target:85, key:"deployed"},
+    {name:"Re-engage", detail:"Inactive facilitators restored to active status.", target:20, key:"reengaged"},
+  ]
+};
+
+/* =========================================================================
+   SEED DATA (demo dataset — replace with your live ministry records)
+   ========================================================================= */
+function seedData(){
+  const churches = [
+    {id:"c1", name:"Living Waters Fellowship", province:"Pangasinan", pastor:"Rev. Danilo Cruz", status:"Growing", health:"Healthy", dateConnected:"2023-02-10", notes:"Strong worship team, active in community outreach."},
+    {id:"c2", name:"New Hope Chapel", province:"Nueva Ecija", pastor:"Pastor Ligaya Reyes", status:"Multiplying", health:"Healthy", dateConnected:"2021-06-01", notes:"Has planted 2 daughter churches."},
+    {id:"c3", name:"Rizal Covenant Church", province:"Rizal", pastor:"Pastor Noel Santos", status:"Connected", health:"Needs Attention", dateConnected:"2024-11-03", notes:"New connection, needs orientation."},
+    {id:"c4", name:"Palawan Grace Assembly", province:"Palawan", pastor:"Pastor Jun Mercado", status:"Emerging", health:"Healthy", dateConnected:"2023-09-14", notes:""},
+    {id:"c5", name:"Mindoro Harvest Church", province:"Oriental Mindoro", pastor:"Pastor Ana Villaflor", status:"Prospect", health:"Unknown", dateConnected:"2025-05-20", notes:"First contact made at district gathering."},
+    {id:"c6", name:"Camarines Living Faith", province:"Camarines Sur", pastor:"Pastor Ramil Ortega", status:"Mature", health:"Healthy", dateConnected:"2019-01-15", notes:"Core team hub church."},
+    {id:"c7", name:"Zambales Community Church", province:"Zambales", pastor:"Pastor Grace Lim", status:"Growing", health:"Healthy", dateConnected:"2022-08-08", notes:""},
+    {id:"c8", name:"Samar Vine Fellowship", province:"Western Samar", pastor:"Pastor Marlon Uy", status:"Inactive", health:"At Risk", dateConnected:"2020-03-12", notes:"No activity reported in 6 months."},
+  ];
+
+  const people = [
+    {id:"p1", name:"Emil Gonzales", role:"District Coordinator", stage:"Multiplying Leader", churchId:"c2", province:"Nueva Ecija", facilitatorStatus:"Active", phone:"0917-555-0102", email:"emil.g@kingdomleadership.org", status:"Active", lastContact:"2026-08-10", nextFollowUp:"2026-08-25", notes:"Leads District 2."},
+    {id:"p2", name:"Karl Domingo", role:"Core Team Leader", stage:"Team Leader", churchId:"c1", province:"Pangasinan", facilitatorStatus:"Active", phone:"0917-555-0110", email:"karl.d@kingdomleadership.org", status:"Active", lastContact:"2026-08-05", nextFollowUp:"2026-08-20", notes:""},
+    {id:"p3", name:"Grace Lim", role:"Pastor", stage:"Team Leader", churchId:"c7", province:"Zambales", facilitatorStatus:"Active", phone:"0917-555-0134", email:"grace.l@kingdomleadership.org", status:"Active", lastContact:"2026-07-28", nextFollowUp:"2026-08-18", notes:""},
+    {id:"p4", name:"Ramil Ortega", role:"Pastor", stage:"Multiplying Leader", churchId:"c6", province:"Camarines Sur", facilitatorStatus:"Active", phone:"0917-555-0145", email:"", status:"Active", lastContact:"2026-08-01", nextFollowUp:"2026-09-01", notes:""},
+    {id:"p5", name:"Noel Santos", role:"Pastor", stage:"Emerging Leader", churchId:"c3", province:"Rizal", facilitatorStatus:"New", phone:"0917-555-0177", email:"", status:"Active", lastContact:"2026-07-15", nextFollowUp:"2026-08-19", notes:"Needs orientation to CRM and coaching cycle."},
+    {id:"p6", name:"Jun Mercado", role:"Pastor", stage:"Facilitator", churchId:"c4", province:"Palawan", facilitatorStatus:"Active", phone:"0917-555-0188", email:"", status:"Active", lastContact:"2026-08-02", nextFollowUp:"2026-08-30", notes:""},
+    {id:"p7", name:"Ana Villaflor", role:"Pastor", stage:"Participant", churchId:"c5", province:"Oriental Mindoro", facilitatorStatus:"", phone:"0917-555-0199", email:"", status:"Needs Verification", lastContact:"2025-05-20", nextFollowUp:"2026-08-22", notes:"First contact only — needs verification of details."},
+    {id:"p8", name:"Marlon Uy", role:"Pastor", stage:"Facilitator", churchId:"c8", province:"Western Samar", facilitatorStatus:"Inactive", phone:"0917-555-0212", email:"", status:"Inactive", lastContact:"2026-02-11", nextFollowUp:"2026-08-16", notes:"Prime candidate for re-engagement."},
+    {id:"p9", name:"Ligaya Reyes", role:"Pastor", stage:"Multiplying Leader", churchId:"c2", province:"Nueva Ecija", facilitatorStatus:"Active", phone:"0917-555-0223", email:"", status:"Active", lastContact:"2026-08-12", nextFollowUp:"2026-09-05", notes:""},
+    {id:"p10", name:"Danilo Cruz", role:"Pastor", stage:"Facilitator", churchId:"c1", province:"Pangasinan", facilitatorStatus:"Active", phone:"0917-555-0234", email:"", status:"Active", lastContact:"2026-08-09", nextFollowUp:"2026-08-24", notes:""},
+    {id:"p11", name:"Rowena Fabros", role:"Emerging Facilitator", stage:"Emerging Leader", churchId:"c1", province:"Pangasinan", facilitatorStatus:"Developing", phone:"0917-555-0245", email:"", status:"Active", lastContact:"2026-07-30", nextFollowUp:"2026-08-17", notes:"Completed DMJ 1-3, needs IAL."},
+    {id:"p12", name:"Bong Pascual", role:"Recruit", stage:"Learner", churchId:"c6", province:"Camarines Sur", facilitatorStatus:"New", phone:"0917-555-0256", email:"", status:"Active", lastContact:"2026-08-03", nextFollowUp:"2026-08-21", notes:""},
+    {id:"p13", name:"Cristy Navarro", role:"Facilitator", stage:"Facilitator", churchId:"c7", province:"Zambales", facilitatorStatus:"Re-engagement", phone:"0917-555-0267", email:"", status:"Active", lastContact:"2026-06-01", nextFollowUp:"2026-08-15", notes:"Was active, went quiet after relocating."},
+    {id:"p14", name:"Edgar Villamor", role:"Recruit", stage:"Contact", churchId:null, province:"Palawan", facilitatorStatus:"", phone:"", email:"", status:"Needs Verification", lastContact:"2026-08-01", nextFollowUp:"2026-08-18", notes:"Met at province gathering, contact info unconfirmed."},
+    {id:"p15", name:"Melissa Tan", role:"Facilitator", stage:"Facilitator", churchId:"c4", province:"Palawan", facilitatorStatus:"Active", phone:"0917-555-0278", email:"", status:"Active", lastContact:"2026-08-06", nextFollowUp:"2026-08-27", notes:""},
+    {id:"p16", name:"Ferdie Alcantara", role:"Facilitator", stage:"Facilitator", churchId:"c8", province:"Western Samar", facilitatorStatus:"Active", phone:"0917-555-0289", email:"", status:"Active", lastContact:"2026-07-22", nextFollowUp:"2026-08-19", notes:""},
+  ];
+
+  const modules = [
+    {id:"m1", name:"DMJ Module 1", category:"Discipleship", description:"Foundations of the discipleship journey.", duration:"1 day", targetAudience:"New believers, participants"},
+    {id:"m2", name:"DMJ Module 2", category:"Discipleship", description:"Growing in relationship and community.", duration:"1 day", targetAudience:"Learners"},
+    {id:"m3", name:"DMJ Module 3", category:"Discipleship", description:"Living on mission.", duration:"1 day", targetAudience:"Learners"},
+    {id:"m4", name:"DMJ Module 4", category:"Discipleship", description:"Multiplying disciples.", duration:"1 day", targetAudience:"Emerging leaders"},
+    {id:"m5", name:"IAL", category:"Facilitator Development", description:"Intentional Approach to Leadership — the core facilitator certification.", duration:"3 days", targetAudience:"Emerging leaders, recruits"},
+    {id:"m6", name:"GMCT", category:"Church Planting", description:"Groups to Multiplying Churches Training.", duration:"2 days", targetAudience:"Facilitators, church planters"},
+    {id:"m7", name:"CHCT", category:"Church Planting", description:"Church Health Coaching Training.", duration:"2 days", targetAudience:"Pastors, coaches"},
+    {id:"m8", name:"Launch the Church", category:"Church Planting", description:"Practical church-launch playbook.", duration:"1 day", targetAudience:"Team leaders"},
+    {id:"m9", name:"HOPE61 Multiply", category:"Church Planting", description:"Multiplication strategy intensive.", duration:"2 days", targetAudience:"Multiplying leaders"},
+    {id:"m10", name:"Facilitator Skills Training", category:"Facilitator Development", description:"Presentation, coaching and group-facilitation skills.", duration:"1 day", targetAudience:"Active facilitators"},
+    {id:"m11", name:"Coaching Workshop", category:"Coaching", description:"1:1 and group coaching practicum.", duration:"1 day", targetAudience:"Coaches, team leaders"},
+  ];
+
+  const events = [
+    {id:"e1", title:"IAL Batch 12", moduleId:"m5", date:"2026-08-22", province:"Pangasinan", location:"Living Waters Fellowship", leadFacilitatorId:"p2", participantIds:["p11","p12"], status:"Confirmed", evaluationScore:null},
+    {id:"e2", title:"DMJ Module 1 — Nueva Ecija Cluster", moduleId:"m1", date:"2026-07-18", province:"Nueva Ecija", location:"New Hope Chapel", leadFacilitatorId:"p9", participantIds:["p7","p12"], status:"Completed", evaluationScore:4.6},
+    {id:"e3", title:"Facilitator Skills Training — District 2", moduleId:"m10", date:"2026-08-30", province:"Palawan", location:"Palawan Grace Assembly", leadFacilitatorId:"p6", participantIds:["p15","p6"], status:"Planned", evaluationScore:null},
+    {id:"e4", title:"GMCT — Camarines Sur", moduleId:"m6", date:"2026-06-10", province:"Camarines Sur", location:"Camarines Living Faith", leadFacilitatorId:"p4", participantIds:["p12"], status:"Completed", evaluationScore:4.3},
+    {id:"e5", title:"IAL Batch 11 — Western Samar Re-engagement", moduleId:"m5", date:"2026-08-05", province:"Western Samar", location:"Samar Vine Fellowship", leadFacilitatorId:"p13", participantIds:["p8","p16"], status:"Report Pending", evaluationScore:4.1},
+    {id:"e6", title:"CHCT — Zambales", moduleId:"m7", date:"2026-09-12", province:"Zambales", location:"Zambales Community Church", leadFacilitatorId:"p3", participantIds:["p13","p3"], status:"Planned", evaluationScore:null},
+  ];
+
+  const completions = [
+    {personId:"p11", moduleId:"m1", eventId:null, date:"2026-01-10", score:4.5},
+    {personId:"p11", moduleId:"m2", eventId:null, date:"2026-02-14", score:4.4},
+    {personId:"p11", moduleId:"m3", eventId:null, date:"2026-03-20", score:4.6},
+    {personId:"p7", moduleId:"m1", eventId:"e2", date:"2026-07-18", score:4.6},
+    {personId:"p12", moduleId:"m1", eventId:"e2", date:"2026-07-18", score:4.5},
+    {personId:"p12", moduleId:"m6", eventId:"e4", date:"2026-06-10", score:4.3},
+    {personId:"p8", moduleId:"m5", eventId:"e5", date:"2026-08-05", score:4.0},
+    {personId:"p16", moduleId:"m5", eventId:"e5", date:"2026-08-05", score:4.2},
+    {personId:"p15", moduleId:"m1", eventId:null, date:"2026-01-05", score:4.5},
+    {personId:"p15", moduleId:"m5", eventId:null, date:"2026-02-20", score:4.4},
+  ];
+
+  const activities = [
+    {id:"a1", type:"Follow-up", personId:"p5", churchId:"c3", date:"2026-08-11", dueDate:"2026-08-19", priority:"High", owner:"Emil Gonzales", status:"In Progress", notes:"Orient Pastor Noel to CRM and coaching cadence."},
+    {id:"a2", type:"Coaching", personId:"p10", churchId:"c1", date:"2026-08-09", dueDate:"", priority:"Normal", owner:"Karl Domingo", status:"Completed", notes:"Reviewed deployment readiness."},
+    {id:"a3", type:"Follow-up", personId:"p8", churchId:"c8", date:"2026-08-01", dueDate:"2026-08-15", priority:"Critical", owner:"Cristy Navarro", status:"Not Started", notes:"Re-engagement conversation — schedule visit."},
+    {id:"a4", type:"Church Visit", personId:"p6", churchId:"c4", date:"2026-08-02", dueDate:"", priority:"Normal", owner:"Emil Gonzales", status:"Completed", notes:"Encouraging visit, church is growing steadily."},
+    {id:"a5", type:"Follow-up", personId:"p14", churchId:null, date:"2026-08-01", dueDate:"2026-08-18", priority:"Normal", owner:"Emil Gonzales", status:"Waiting", notes:"Confirm contact number."},
+    {id:"a6", type:"Recruitment", personId:"p7", churchId:"c5", date:"2026-05-20", dueDate:"2026-08-22", priority:"High", owner:"Ana Villaflor", status:"In Progress", notes:"Follow up on facilitator interest."},
+    {id:"a7", type:"Coaching", personId:"p3", churchId:"c7", date:"2026-07-28", dueDate:"", priority:"Normal", owner:"Karl Domingo", status:"Completed", notes:"Church health coaching session — strong growth trajectory."},
+    {id:"a8", type:"Follow-up", personId:"p13", churchId:"c7", date:"2026-08-01", dueDate:"2026-08-15", priority:"High", owner:"Grace Lim", status:"In Progress", notes:"Re-engagement plan — invite to Facilitator Skills Training."},
+  ];
+
+  const pipelineLog = [
+    {personId:"p11", from:"Learner", to:"Emerging Leader", date:"2026-06-01", note:"Completed DMJ 1-4."},
+    {personId:"p9", from:"Emerging Leader", to:"Team Leader", date:"2025-11-15", note:""},
+    {personId:"p9", from:"Team Leader", to:"Multiplying Leader", date:"2026-05-01", note:"Planted second daughter church."},
+    {personId:"p12", from:"Contact", to:"Participant", date:"2026-06-10", note:""},
+    {personId:"p12", from:"Participant", to:"Learner", date:"2026-07-18", note:"Completed DMJ Module 1."},
+    {personId:"p7", from:"Contact", to:"Participant", date:"2026-07-18", note:""},
+    {personId:"p5", from:"Contact", to:"Emerging Leader", date:"2026-07-01", note:"Fast-tracked as installed pastor."},
+  ];
+
+  return {people, churches, modules, events, completions, activities, pipelineLog};
+}
+
+/* =========================================================================
+   STATE + STORAGE
+   ========================================================================= */
+let STATE = null;
+const STORAGE_KEY = "kcrm_state_v1";
+
+async function loadState(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw){ STATE = JSON.parse(raw); return; }
+  }catch(e){ console.error("Storage read failed", e); }
+  STATE = seedData();
+  await persist();
+}
+async function persist(){
+  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(STATE)); }
+  catch(e){ console.error("Storage save failed — your browser may be blocking local storage.", e); showToast("Couldn't save — storage may be full or blocked."); }
+}
+function uid(prefix){ return prefix + "_" + Math.random().toString(36).slice(2,9); }
+
+function showToast(msg){
+  const t = document.getElementById("toast");
+  t.textContent = msg; t.classList.add("show");
+  clearTimeout(window.__toastTimer);
+  window.__toastTimer = setTimeout(()=>t.classList.remove("show"), 2200);
+}
+
+/* =========================================================================
+   EXPORT / IMPORT
+   ========================================================================= */
+function exportData(){
+  const blob = new Blob([JSON.stringify(STATE, null, 2)], {type:"application/json"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  const stamp = new Date().toISOString().slice(0,10);
+  a.href = url; a.download = `kingdom-leadership-crm-backup-${stamp}.json`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast("Backup downloaded.");
+}
+async function importData(event){
+  const file = event.target.files[0];
+  if(!file) return;
+  try{
+    const text = await file.text();
+    const parsed = JSON.parse(text);
+    const required = ["people","churches","modules","events","completions","activities","pipelineLog"];
+    const missing = required.filter(k=>!(k in parsed));
+    if(missing.length){ showToast("Import failed — missing: "+missing.join(", ")); return; }
+    if(!confirm("This will replace all current data in this browser with the contents of the imported file. Continue?")) { event.target.value=""; return; }
+    STATE = parsed;
+    await persist();
+    showToast("Data imported.");
+    renderAll();
+  }catch(e){
+    console.error(e);
+    showToast("Import failed — file isn't valid JSON.");
+  }
+  event.target.value = "";
+}
+
+/* =========================================================================
+   HELPERS
+   ========================================================================= */
+function personName(id){ const p = STATE.people.find(x=>x.id===id); return p ? p.name : "—"; }
+function churchName(id){ const c = STATE.churches.find(x=>x.id===id); return c ? c.name : "—"; }
+function moduleName(id){ const m = STATE.modules.find(x=>x.id===id); return m ? m.name : "—"; }
+function fmtDate(d){ if(!d) return "—"; const dt = new Date(d+"T00:00:00"); if(isNaN(dt)) return d; return dt.toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"}); }
+function daysUntil(d){ if(!d) return null; const today=new Date(); today.setHours(0,0,0,0); const dt=new Date(d+"T00:00:00"); return Math.round((dt-today)/86400000); }
+function isOverdue(d){ const n=daysUntil(d); return n!==null && n<0; }
+
+function pillForStage(stage){
+  const idx = PIPELINE_STAGES.indexOf(stage);
+  const cls = idx>=4 ? "pill-gold" : idx>=2 ? "pill-teal" : "pill-grey";
+  return `<span class="pill ${cls}">${stage||"—"}</span>`;
+}
+function pillForFacStatus(s){
+  if(!s) return `<span class="small">—</span>`;
+  const map = {Active:"pill-teal", Developing:"pill-gold", New:"pill-grey", Inactive:"pill-rust", "Re-engagement":"pill-rust"};
+  return `<span class="pill ${map[s]||'pill-grey'}">${s}</span>`;
+}
+function pillForChurchStatus(s){
+  const map = {Prospect:"pill-grey", Connected:"pill-grey", Emerging:"pill-gold", Growing:"pill-teal", Mature:"pill-teal", Multiplying:"pill-gold", Inactive:"pill-rust"};
+  return `<span class="pill ${map[s]||'pill-grey'}">${s}</span>`;
+}
+function pillForActivityStatus(s){
+  const map = {"Not Started":"pill-grey","In Progress":"pill-gold","Waiting":"pill-grey","Completed":"pill-teal","Cancelled":"pill-rust"};
+  return `<span class="pill ${map[s]||'pill-grey'}">${s}</span>`;
+}
+function pillForPriority(p){
+  const map = {Critical:"pill-rust", High:"pill-gold", Normal:"pill-grey", Low:"pill-grey"};
+  return `<span class="pill ${map[p]||'pill-grey'}">${p}</span>`;
+}
+function pillForEventStatus(s){
+  const map = {Planned:"pill-grey", Confirmed:"pill-gold", Ongoing:"pill-gold", Completed:"pill-teal", "Report Pending":"pill-rust", Closed:"pill-grey"};
+  return `<span class="pill ${map[s]||'pill-grey'}">${s}</span>`;
+}
+function selectOptions(list, current, blankLabel){
+  let html = blankLabel ? `<option value="">${blankLabel}</option>` : "";
+  list.forEach(v=>{ html += `<option value="${v}" ${v===current?"selected":""}>${v||"—"}</option>`; });
+  return html;
+}
+function personSelectOptions(current){
+  let html = `<option value="">— none —</option>`;
+  STATE.people.forEach(p=> html += `<option value="${p.id}" ${p.id===current?"selected":""}>${p.name}</option>`);
+  return html;
+}
+function churchSelectOptions(current){
+  let html = `<option value="">— none —</option>`;
+  STATE.churches.forEach(c=> html += `<option value="${c.id}" ${c.id===current?"selected":""}>${c.name}</option>`);
+  return html;
+}
+function moduleSelectOptions(current){
+  let html = "";
+  STATE.modules.forEach(m=> html += `<option value="${m.id}" ${m.id===current?"selected":""}>${m.name}</option>`);
+  return html;
+}
+function provinceSelectOptions(current, blank){
+  let html = blank ? `<option value="">${blank}</option>` : "";
+  PROVINCES_SEED.forEach(pr=> html += `<option value="${pr.name}" ${pr.name===current?"selected":""}>${pr.name}</option>`);
+  return html;
+}
+
+/* =========================================================================
+   NAVIGATION
+   ========================================================================= */
+function goto(view){
+  document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));
+  document.getElementById("view-"+view).classList.add("active");
+  document.querySelectorAll(".navitem[data-view]").forEach(n=>n.classList.toggle("active", n.dataset.view===view));
+  renderAll();
+  document.getElementById("main").scrollTop = 0;
+  window.scrollTo(0,0);
+}
+document.querySelectorAll(".navitem[data-view]").forEach(n=> n.addEventListener("click", ()=>goto(n.dataset.view)));
+document.querySelectorAll("[data-goto]").forEach(n=> n.addEventListener("click",(e)=>{e.preventDefault(); goto(n.dataset.goto);}));
+
+/* =========================================================================
+   MODAL HELPERS
+   ========================================================================= */
+function openModal(html){
+  document.getElementById("modal-content").innerHTML = html;
+  document.getElementById("overlay").classList.add("active");
+}
+function closeModal(){ document.getElementById("overlay").classList.remove("active"); }
+document.getElementById("overlay").addEventListener("click", (e)=>{ if(e.target.id==="overlay") closeModal(); });
+
+/* =========================================================================
+   DASHBOARD
+   ========================================================================= */
+function computeCounts(){
+  const activeFac = STATE.people.filter(p=>p.facilitatorStatus==="Active").length;
+  const inactiveFac = STATE.people.filter(p=>p.facilitatorStatus==="Inactive"||p.facilitatorStatus==="Re-engagement").length;
+  const trainingsThisMonth = STATE.events.filter(e=>{ const d=new Date(e.date); const now=new Date(); return d.getMonth()===now.getMonth() && d.getFullYear()===now.getFullYear(); }).length;
+  const followUpsDue = STATE.activities.filter(a=> a.dueDate && a.status!=="Completed" && a.status!=="Cancelled" && daysUntil(a.dueDate)<=7).length;
+  const overdue = STATE.activities.filter(a=> a.dueDate && a.status!=="Completed" && a.status!=="Cancelled" && isOverdue(a.dueDate)).length;
+  return {activeFac, inactiveFac, trainingsThisMonth, followUpsDue, overdue};
+}
+
+function renderDashboard(){
+  const c = computeCounts();
+  const stats = [
+    {k:"Total People", v:STATE.people.length, d:STATE.people.filter(p=>p.status==="Active").length+" active"},
+    {k:"Total Churches", v:STATE.churches.length, d:STATE.churches.filter(c=>c.status==="Multiplying").length+" multiplying"},
+    {k:"Active Facilitators", v:c.activeFac, d:c.inactiveFac+" inactive / re-engaging", warn:c.inactiveFac>0},
+    {k:"Follow-ups Due (7 days)", v:c.followUpsDue, d:c.overdue+" overdue", warn:c.overdue>0},
+  ];
+  document.getElementById("dash-stats").innerHTML = stats.map(s=>`
+    <div class="card stat"><div class="k">${s.k}</div><div class="v">${s.v}</div><div class="d ${s.warn?'warn':''}">${s.d}</div></div>
+  `).join("");
+
+  // pipeline funnel
+  const colors = ["#726B5C","#8A8168","#B4832A","#C9973A","#2F6F62","#26584D","#1E463D"];
+  const funnelData = PIPELINE_STAGES.map((s,i)=>({stage:s, n:STATE.people.filter(p=>p.stage===s).length, color:colors[i]}));
+  document.getElementById("pipeline-total-lbl").textContent = "· "+STATE.people.length+" people total";
+  document.getElementById("dash-funnel").innerHTML = funnelData.map(f=>`
+    <div class="funnel-seg" style="background:${f.color}"><span class="n">${f.n}</span><span class="lbl">${f.stage}</span></div>
+  `).join("");
+
+  // wig mini
+  const pct = Math.min(100, Math.round((c.activeFac-WIG.start<0?0:(c.activeFac-WIG.start))/(WIG.target-WIG.start)*100));
+  document.getElementById("dash-wig").innerHTML = `
+    <div style="font-family:'Fraunces',serif;font-size:26px;font-weight:600;">${c.activeFac} <span class="small" style="font-family:'Inter';">of ${WIG.target} target</span></div>
+    <div class="wig-bar-track" style="margin:10px 0 6px;"><div class="wig-bar-fill" style="width:${pct}%"></div></div>
+    <div class="small">${pct}% of the way from ${WIG.start} → ${WIG.target} · deadline ${fmtDate(WIG.deadline)}</div>
+  `;
+
+  // risks
+  const overdueFollowUps = STATE.activities.filter(a=>a.dueDate && a.status!=="Completed" && a.status!=="Cancelled" && isOverdue(a.dueDate));
+  const inactiveFacs = STATE.people.filter(p=>p.facilitatorStatus==="Inactive"||p.facilitatorStatus==="Re-engagement");
+  const noNextStepChurches = STATE.churches.filter(ch => ch.status!=="Inactive" && !STATE.activities.some(a=>a.churchId===ch.id && a.status!=="Completed" && a.status!=="Cancelled"));
+  let riskHtml = "";
+  if(overdueFollowUps.length) riskHtml += `<div class="callout callout-rust" style="margin-bottom:8px;">⚠ <div><strong>${overdueFollowUps.length} overdue follow-up${overdueFollowUps.length>1?'s':''}</strong><br>${overdueFollowUps.slice(0,3).map(a=>personName(a.personId)).join(", ")}${overdueFollowUps.length>3?" …":""}</div></div>`;
+  if(inactiveFacs.length) riskHtml += `<div class="callout callout-gold" style="margin-bottom:8px;">↻ <div><strong>${inactiveFacs.length} facilitator${inactiveFacs.length>1?'s':''} inactive / re-engaging</strong><br>${inactiveFacs.slice(0,3).map(p=>p.name).join(", ")}${inactiveFacs.length>3?" …":""}</div></div>`;
+  if(noNextStepChurches.length) riskHtml += `<div class="callout callout-teal">✦ <div><strong>${noNextStepChurches.length} church${noNextStepChurches.length>1?'es':''} with no open next step</strong><br>${noNextStepChurches.slice(0,3).map(c=>c.name).join(", ")}${noNextStepChurches.length>3?" …":""}</div></div>`;
+  document.getElementById("dash-risks").innerHTML = riskHtml || `<div class="empty">Nothing needs attention right now.</div>`;
+
+  // province health mini table
+  const provRows = PROVINCES_SEED.slice(0,8).map(pr=>{
+    const churchCt = STATE.churches.filter(c=>c.province===pr.name).length;
+    const activeFacCt = STATE.people.filter(p=>p.province===pr.name && p.facilitatorStatus==="Active").length;
+    return `<tr><td>${pr.name}</td><td>${churchCt}</td><td>${activeFacCt}</td></tr>`;
+  }).join("");
+  document.getElementById("dash-provinces").innerHTML = `<table><thead><tr><th>Province</th><th>Churches</th><th>Active Fac.</th></tr></thead><tbody>${provRows}</tbody></table>`;
+
+  // upcoming trainings
+  const upcoming = STATE.events.filter(e=>["Planned","Confirmed","Ongoing"].includes(e.status)).sort((a,b)=>new Date(a.date)-new Date(b.date)).slice(0,5);
+  document.getElementById("dash-trainings").innerHTML = upcoming.length ? upcoming.map(e=>`
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #EFEBDF;">
+      <div><div style="font-weight:700;font-size:12.8px;">${e.title}</div><div class="small">${e.province} · ${fmtDate(e.date)}</div></div>
+      ${pillForEventStatus(e.status)}
+    </div>`).join("") : `<div class="empty">No upcoming trainings scheduled.</div>`;
+}
+
+/* =========================================================================
+   PEOPLE
+   ========================================================================= */
+function populatePeopleFilters(){
+  document.getElementById("people-filter-stage").innerHTML = `<option value="">All pipeline stages</option>` + selectOptions(PIPELINE_STAGES);
+  document.getElementById("people-filter-province").innerHTML = `<option value="">All provinces</option>` + selectOptions(PROVINCES_SEED.map(p=>p.name));
+}
+function renderPeople(){
+  const q = (document.getElementById("people-search").value||"").toLowerCase();
+  const stageF = document.getElementById("people-filter-stage").value;
+  const provF = document.getElementById("people-filter-province").value;
+  const rows = STATE.people.filter(p=>{
+    if(stageF && p.stage!==stageF) return false;
+    if(provF && p.province!==provF) return false;
+    if(q && !(p.name.toLowerCase().includes(q) || (p.role||"").toLowerCase().includes(q) || churchName(p.churchId).toLowerCase().includes(q))) return false;
+    return true;
+  });
+  document.getElementById("people-count").textContent = rows.length + " of " + STATE.people.length;
+  document.querySelector("#people-table tbody").innerHTML = rows.map(p=>`
+    <tr onclick="openPersonForm('${p.id}')">
+      <td><strong>${p.name}</strong><div class="small">${p.role||""}</div></td>
+      <td>${pillForStage(p.stage)}</td>
+      <td>${churchName(p.churchId)}</td>
+      <td>${p.province||"—"}</td>
+      <td>${pillForFacStatus(p.facilitatorStatus)}</td>
+      <td class="mono small">${fmtDate(p.lastContact)}</td>
+      <td class="mono small" style="${isOverdue(p.nextFollowUp)?'color:var(--rust);font-weight:700;':''}">${fmtDate(p.nextFollowUp)}</td>
+    </tr>`).join("") || `<tr><td colspan="7"><div class="empty">No people match these filters.</div></td></tr>`;
+}
+function openPersonForm(id){
+  const p = id ? STATE.people.find(x=>x.id===id) : null;
+  const html = `
+    <div class="modal-head"><h3>${p?"Edit Person":"Add Person"}</h3><button class="modal-close" onclick="closeModal()">&times;</button></div>
+    <label class="field"><span class="lbl">Full Name</span><input id="f-name" value="${p?p.name:''}" placeholder="e.g. Ana Villaflor"></label>
+    <div class="two-col">
+      <label class="field"><span class="lbl">Ministry Role</span><input id="f-role" value="${p?p.role||'':''}" placeholder="e.g. Pastor, Facilitator"></label>
+      <label class="field"><span class="lbl">Pipeline Stage</span><select id="f-stage">${selectOptions(PIPELINE_STAGES, p?p.stage:"Contact")}</select></label>
+      <label class="field"><span class="lbl">Church</span><select id="f-church">${churchSelectOptions(p?p.churchId:"")}</select></label>
+      <label class="field"><span class="lbl">Province</span><select id="f-province">${provinceSelectOptions(p?p.province:"")}</select></label>
+      <label class="field"><span class="lbl">Facilitator Status</span><select id="f-facstatus">${selectOptions(FAC_STATUSES, p?p.facilitatorStatus:"")}</select></label>
+      <label class="field"><span class="lbl">Status</span><select id="f-status">${selectOptions(PERSON_STATUSES, p?p.status:"Active")}</select></label>
+      <label class="field"><span class="lbl">Contact Number</span><input id="f-phone" value="${p?p.phone||'':''}"></label>
+      <label class="field"><span class="lbl">Email</span><input id="f-email" value="${p?p.email||'':''}"></label>
+      <label class="field"><span class="lbl">Last Contact</span><input type="date" id="f-lastcontact" value="${p?p.lastContact||'':''}"></label>
+      <label class="field"><span class="lbl">Next Follow-up</span><input type="date" id="f-nextfollowup" value="${p?p.nextFollowUp||'':''}"></label>
+    </div>
+    <label class="field"><span class="lbl">Notes</span><textarea id="f-notes">${p?p.notes||'':''}</textarea></label>
+    <div class="modal-foot">
+      <span>${p?`<button class="btn btn-danger" onclick="deletePerson('${p.id}')">Delete</button>`:''}</span>
+      <span style="display:flex;gap:8px;"><button class="btn" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="savePerson(${p?`'${p.id}'`:'null'})">Save</button></span>
+    </div>`;
+  openModal(html);
+}
+async function savePerson(id){
+  const val = (elId)=>document.getElementById(elId).value;
+  const newStage = val("f-stage");
+  let existing = id ? STATE.people.find(x=>x.id===id) : null;
+  const data = {
+    name: val("f-name").trim() || "Unnamed", role: val("f-role"), stage: newStage,
+    churchId: val("f-church")||null, province: val("f-province"), facilitatorStatus: val("f-facstatus"),
+    status: val("f-status"), phone: val("f-phone"), email: val("f-email"),
+    lastContact: val("f-lastcontact"), nextFollowUp: val("f-nextfollowup"), notes: val("f-notes"),
+  };
+  if(existing){
+    if(existing.stage !== newStage){
+      STATE.pipelineLog.push({personId:existing.id, from:existing.stage, to:newStage, date:new Date().toISOString().slice(0,10), note:"Updated via People record."});
+    }
+    Object.assign(existing, data);
+  } else {
+    STATE.people.push({id: uid("p"), ...data});
+  }
+  await persist(); closeModal(); showToast("Person saved."); renderAll();
+}
+async function deletePerson(id){
+  STATE.people = STATE.people.filter(p=>p.id!==id);
+  await persist(); closeModal(); showToast("Person deleted."); renderAll();
+}
+
+/* =========================================================================
+   CHURCHES
+   ========================================================================= */
+function populateChurchFilters(){
+  document.getElementById("church-filter-status").innerHTML = `<option value="">All statuses</option>` + selectOptions(CHURCH_STATUSES);
+}
+function renderChurches(){
+  const q = (document.getElementById("church-search").value||"").toLowerCase();
+  const statusF = document.getElementById("church-filter-status").value;
+  const rows = STATE.churches.filter(c=>{
+    if(statusF && c.status!==statusF) return false;
+    if(q && !(c.name.toLowerCase().includes(q) || (c.pastor||"").toLowerCase().includes(q))) return false;
+    return true;
+  });
+  document.getElementById("church-count").textContent = rows.length + " of " + STATE.churches.length;
+  document.getElementById("church-grid").innerHTML = rows.map(c=>{
+    const peopleCt = STATE.people.filter(p=>p.churchId===c.id).length;
+    return `<div class="card" style="cursor:pointer;" onclick="openChurchForm('${c.id}')">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+        <div><div style="font-weight:700;font-size:14.5px;">${c.name}</div><div class="small">${c.province}</div></div>
+        ${pillForChurchStatus(c.status)}
+      </div>
+      <hr class="rule" style="margin:12px 0;">
+      <div class="small" style="margin-bottom:4px;"><strong>Pastor:</strong> ${c.pastor||"Unknown"}</div>
+      <div class="small" style="margin-bottom:4px;"><strong>Connected:</strong> ${fmtDate(c.dateConnected)}</div>
+      <div class="small"><strong>People linked:</strong> ${peopleCt}</div>
+    </div>`;
+  }).join("") || `<div class="empty" style="grid-column:1/-1;">No churches match these filters.</div>`;
+}
+function openChurchForm(id){
+  const c = id ? STATE.churches.find(x=>x.id===id) : null;
+  const html = `
+    <div class="modal-head"><h3>${c?"Edit Church":"Add Church"}</h3><button class="modal-close" onclick="closeModal()">&times;</button></div>
+    <label class="field"><span class="lbl">Church Name</span><input id="f-cname" value="${c?c.name:''}"></label>
+    <div class="two-col">
+      <label class="field"><span class="lbl">Province</span><select id="f-cprovince">${provinceSelectOptions(c?c.province:"")}</select></label>
+      <label class="field"><span class="lbl">Status</span><select id="f-cstatus">${selectOptions(CHURCH_STATUSES, c?c.status:"Prospect")}</select></label>
+      <label class="field"><span class="lbl">Pastor / Leader</span><input id="f-cpastor" value="${c?c.pastor||'':''}"></label>
+      <label class="field"><span class="lbl">Health</span><select id="f-chealth">${selectOptions(["Healthy","Needs Attention","At Risk","Unknown"], c?c.health:"Unknown")}</select></label>
+      <label class="field"><span class="lbl">Date Connected</span><input type="date" id="f-cdate" value="${c?c.dateConnected||'':''}"></label>
+    </div>
+    <label class="field"><span class="lbl">Notes</span><textarea id="f-cnotes">${c?c.notes||'':''}</textarea></label>
+    <div class="modal-foot">
+      <span>${c?`<button class="btn btn-danger" onclick="deleteChurch('${c.id}')">Delete</button>`:''}</span>
+      <span style="display:flex;gap:8px;"><button class="btn" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="saveChurch(${c?`'${c.id}'`:'null'})">Save</button></span>
+    </div>`;
+  openModal(html);
+}
+async function saveChurch(id){
+  const val = (elId)=>document.getElementById(elId).value;
+  const data = { name: val("f-cname").trim()||"Unnamed Church", province: val("f-cprovince"), status: val("f-cstatus"), pastor: val("f-cpastor"), health: val("f-chealth"), dateConnected: val("f-cdate"), notes: val("f-cnotes") };
+  if(id){ Object.assign(STATE.churches.find(x=>x.id===id), data); }
+  else{ STATE.churches.push({id: uid("c"), ...data}); }
+  await persist(); closeModal(); showToast("Church saved."); renderAll();
+}
+async function deleteChurch(id){
+  STATE.churches = STATE.churches.filter(c=>c.id!==id);
+  await persist(); closeModal(); showToast("Church deleted."); renderAll();
+}
+
+/* =========================================================================
+   DISCIPLESHIP PIPELINE
+   ========================================================================= */
+function renderPipeline(){
+  document.getElementById("pipeline-board").innerHTML = PIPELINE_STAGES.map(stage=>{
+    const inStage = STATE.people.filter(p=>p.stage===stage);
+    return `<div class="kanban-col"><h4>${stage} <span>${inStage.length}</span></h4>
+      ${inStage.map(p=>`<div class="kanban-card" onclick="openPersonForm('${p.id}')"><div class="nm">${p.name}</div><div class="meta">${p.province||''}</div></div>`).join("") || `<div class="small" style="padding:8px;">Empty</div>`}
+    </div>`;
+  }).join("");
+
+  const log = [...STATE.pipelineLog].sort((a,b)=>new Date(b.date)-new Date(a.date));
+  document.getElementById("pipeline-log-body").innerHTML = log.map(l=>`
+    <tr><td class="mono small">${fmtDate(l.date)}</td><td>${personName(l.personId)}</td><td>${pillForStage(l.from)}</td><td>${pillForStage(l.to)}</td><td class="small">${l.note||""}</td></tr>
+  `).join("") || `<tr><td colspan="5"><div class="empty">No stage changes logged yet.</div></td></tr>`;
+}
+
+/* =========================================================================
+   LMS — MODULES + EVENTS + COMPLETIONS
+   ========================================================================= */
+function renderModules(){
+  document.getElementById("module-grid").innerHTML = STATE.modules.map(m=>{
+    const completedCt = STATE.completions.filter(c=>c.moduleId===m.id).length;
+    const eventCt = STATE.events.filter(e=>e.moduleId===m.id).length;
+    return `<div class="card" style="cursor:pointer;" onclick="openModuleForm('${m.id}')">
+      <div style="display:flex;justify-content:space-between;"><strong style="font-size:13.8px;">${m.name}</strong><span class="pill pill-grey">${m.category}</span></div>
+      <div class="small" style="margin:8px 0;">${m.description||""}</div>
+      <div class="small"><strong>${completedCt}</strong> completions · <strong>${eventCt}</strong> sessions · ${m.duration||"—"}</div>
+    </div>`;
+  }).join("");
+}
+function openModuleForm(id){
+  const m = id ? STATE.modules.find(x=>x.id===id) : null;
+  const html = `
+    <div class="modal-head"><h3>${m?"Edit Module":"Add Module"}</h3><button class="modal-close" onclick="closeModal()">&times;</button></div>
+    <label class="field"><span class="lbl">Module Name</span><input id="f-mname" value="${m?m.name:''}"></label>
+    <div class="two-col">
+      <label class="field"><span class="lbl">Category</span><select id="f-mcat">${selectOptions(MODULE_CATEGORIES, m?m.category:MODULE_CATEGORIES[0])}</select></label>
+      <label class="field"><span class="lbl">Duration</span><input id="f-mdur" value="${m?m.duration||'':''}" placeholder="e.g. 2 days"></label>
+      <label class="field" style="grid-column:1/-1;"><span class="lbl">Target Audience</span><input id="f-maud" value="${m?m.targetAudience||'':''}"></label>
+    </div>
+    <label class="field"><span class="lbl">Description</span><textarea id="f-mdesc">${m?m.description||'':''}</textarea></label>
+    <div class="modal-foot">
+      <span>${m?`<button class="btn btn-danger" onclick="deleteModule('${m.id}')">Delete</button>`:''}</span>
+      <span style="display:flex;gap:8px;"><button class="btn" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="saveModule(${m?`'${m.id}'`:'null'})">Save</button></span>
+    </div>`;
+  openModal(html);
+}
+async function saveModule(id){
+  const val=(e)=>document.getElementById(e).value;
+  const data = {name: val("f-mname").trim()||"Untitled Module", category: val("f-mcat"), duration: val("f-mdur"), targetAudience: val("f-maud"), description: val("f-mdesc")};
+  if(id) Object.assign(STATE.modules.find(x=>x.id===id), data);
+  else STATE.modules.push({id:uid("m"), ...data});
+  await persist(); closeModal(); showToast("Module saved."); renderAll();
+}
+async function deleteModule(id){
+  STATE.modules = STATE.modules.filter(m=>m.id!==id);
+  await persist(); closeModal(); showToast("Module deleted."); renderAll();
+}
+
+function populateEventFilters(){
+  document.getElementById("event-filter-status").innerHTML = `<option value="">All statuses</option>` + selectOptions(EVENT_STATUSES);
+}
+function renderEvents(){
+  const statusF = document.getElementById("event-filter-status").value;
+  const rows = STATE.events.filter(e=> !statusF || e.status===statusF).sort((a,b)=>new Date(a.date)-new Date(b.date));
+  document.getElementById("event-count").textContent = rows.length + " of " + STATE.events.length;
+  document.getElementById("event-table-body").innerHTML = rows.map(e=>`
+    <tr onclick="openEventForm('${e.id}')">
+      <td><strong>${e.title}</strong><div class="small">${e.location||""}</div></td>
+      <td>${moduleName(e.moduleId)}</td>
+      <td class="mono small">${fmtDate(e.date)}</td>
+      <td>${e.province||"—"}</td>
+      <td>${personName(e.leadFacilitatorId)}</td>
+      <td>${(e.participantIds||[]).length}</td>
+      <td>${pillForEventStatus(e.status)}</td>
+    </tr>`).join("") || `<tr><td colspan="7"><div class="empty">No trainings match this filter.</div></td></tr>`;
+}
+function openEventForm(id){
+  const e = id ? STATE.events.find(x=>x.id===id) : null;
+  const participantChecklist = STATE.people.map(p=>`
+    <label style="display:flex;align-items:center;gap:6px;font-size:12.5px;padding:3px 0;">
+      <input type="checkbox" value="${p.id}" class="ev-participant" style="width:auto;" ${e && e.participantIds.includes(p.id)?"checked":""}> ${p.name}
+    </label>`).join("");
+  const html = `
+    <div class="modal-head"><h3>${e?"Edit Training":"Schedule Training"}</h3><button class="modal-close" onclick="closeModal()">&times;</button></div>
+    <label class="field"><span class="lbl">Training Title</span><input id="f-etitle" value="${e?e.title:''}"></label>
+    <div class="two-col">
+      <label class="field"><span class="lbl">Module</span><select id="f-emodule">${moduleSelectOptions(e?e.moduleId:STATE.modules[0].id)}</select></label>
+      <label class="field"><span class="lbl">Date</span><input type="date" id="f-edate" value="${e?e.date:''}"></label>
+      <label class="field"><span class="lbl">Province</span><select id="f-eprovince">${provinceSelectOptions(e?e.province:"")}</select></label>
+      <label class="field"><span class="lbl">Location</span><input id="f-eloc" value="${e?e.location||'':''}"></label>
+      <label class="field"><span class="lbl">Lead Facilitator</span><select id="f-elead">${personSelectOptions(e?e.leadFacilitatorId:"")}</select></label>
+      <label class="field"><span class="lbl">Status</span><select id="f-estatus">${selectOptions(EVENT_STATUSES, e?e.status:"Planned")}</select></label>
+      <label class="field"><span class="lbl">Evaluation Score (1-5)</span><input type="number" min="1" max="5" step="0.1" id="f-eeval" value="${e&&e.evaluationScore!=null?e.evaluationScore:''}"></label>
+    </div>
+    <label class="field"><span class="lbl">Participants</span>
+      <div style="max-height:150px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;padding:8px 10px;">${participantChecklist}</div>
+    </label>
+    <div class="callout callout-teal" style="margin-top:4px;">✓ Setting status to <strong>Completed</strong> will automatically record a module completion for every checked participant.</div>
+    <div class="modal-foot">
+      <span>${e?`<button class="btn btn-danger" onclick="deleteEvent('${e.id}')">Delete</button>`:''}</span>
+      <span style="display:flex;gap:8px;"><button class="btn" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="saveEvent(${e?`'${e.id}'`:'null'})">Save</button></span>
+    </div>`;
+  openModal(html);
+}
+async function saveEvent(id){
+  const val=(x)=>document.getElementById(x).value;
+  const participantIds = Array.from(document.querySelectorAll(".ev-participant:checked")).map(c=>c.value);
+  const status = val("f-estatus");
+  const moduleId = val("f-emodule");
+  const evalScore = val("f-eeval") ? parseFloat(val("f-eeval")) : null;
+  const data = {title: val("f-etitle").trim()||"Untitled Training", moduleId, date: val("f-edate"), province: val("f-eprovince"), location: val("f-eloc"), leadFacilitatorId: val("f-elead")||null, status, participantIds, evaluationScore: evalScore};
+  let ev;
+  if(id){ ev = STATE.events.find(x=>x.id===id); Object.assign(ev, data); }
+  else{ ev = {id: uid("e"), ...data}; STATE.events.push(ev); }
+
+  if(status==="Completed"){
+    participantIds.forEach(pid=>{
+      const exists = STATE.completions.some(c=>c.personId===pid && c.moduleId===moduleId && c.eventId===ev.id);
+      if(!exists) STATE.completions.push({personId:pid, moduleId, eventId:ev.id, date: ev.date, score: evalScore});
+    });
+  }
+  await persist(); closeModal(); showToast("Training saved."); renderAll();
+}
+async function deleteEvent(id){
+  STATE.events = STATE.events.filter(e=>e.id!==id);
+  STATE.completions = STATE.completions.filter(c=>c.eventId!==id);
+  await persist(); closeModal(); showToast("Training deleted."); renderAll();
+}
+
+function renderReadiness(){
+  const facs = STATE.people.filter(p=>p.facilitatorStatus);
+  document.getElementById("readiness-body").innerHTML = facs.map(p=>{
+    const done = CORE_MODULES.filter(mn=>{
+      const mod = STATE.modules.find(m=>m.name===mn);
+      return mod && STATE.completions.some(c=>c.personId===p.id && c.moduleId===mod.id);
+    });
+    const pct = Math.round(done.length/CORE_MODULES.length*100);
+    return `<tr onclick="openPersonForm('${p.id}')">
+      <td><strong>${p.name}</strong></td>
+      <td>${pillForFacStatus(p.facilitatorStatus)}</td>
+      <td class="small">${done.length} / ${CORE_MODULES.length}</td>
+      <td style="min-width:140px;"><div class="prog-track"><div class="prog-fill" style="width:${pct}%"></div></div></td>
+    </tr>`;
+  }).join("") || `<tr><td colspan="4"><div class="empty">No facilitators yet.</div></td></tr>`;
+}
+
+/* =========================================================================
+   ACTIVITIES
+   ========================================================================= */
+function populateActivityFilters(){
+  document.getElementById("activity-filter-type").innerHTML = `<option value="">All types</option>` + selectOptions(ACTIVITY_TYPES);
+  document.getElementById("activity-filter-status").innerHTML = `<option value="">All statuses</option>` + selectOptions(ACTIVITY_STATUSES);
+}
+function renderActivities(){
+  const typeF = document.getElementById("activity-filter-type").value;
+  const statusF = document.getElementById("activity-filter-status").value;
+  const overdueOnly = document.getElementById("activity-filter-overdue").checked;
+  const rows = STATE.activities.filter(a=>{
+    if(typeF && a.type!==typeF) return false;
+    if(statusF && a.status!==statusF) return false;
+    if(overdueOnly && !isOverdue(a.dueDate)) return false;
+    return true;
+  }).sort((a,b)=>new Date(b.date)-new Date(a.date));
+  document.getElementById("activity-count").textContent = rows.length + " of " + STATE.activities.length;
+  document.getElementById("activity-table-body").innerHTML = rows.map(a=>`
+    <tr onclick="openActivityForm('${a.id}')">
+      <td>${a.type}</td>
+      <td>${personName(a.personId)}</td>
+      <td>${a.churchId?churchName(a.churchId):"—"}</td>
+      <td class="mono small">${fmtDate(a.date)}</td>
+      <td class="mono small" style="${isOverdue(a.dueDate) && a.status!=='Completed' ?'color:var(--rust);font-weight:700;':''}">${a.dueDate?fmtDate(a.dueDate):"—"}</td>
+      <td>${pillForPriority(a.priority)}</td>
+      <td class="small">${a.owner||"—"}</td>
+      <td>${pillForActivityStatus(a.status)}</td>
+    </tr>`).join("") || `<tr><td colspan="8"><div class="empty">No activities match these filters.</div></td></tr>`;
+}
+function openActivityForm(id){
+  const a = id ? STATE.activities.find(x=>x.id===id) : null;
+  const html = `
+    <div class="modal-head"><h3>${a?"Edit Activity":"Log Activity"}</h3><button class="modal-close" onclick="closeModal()">&times;</button></div>
+    <div class="two-col">
+      <label class="field"><span class="lbl">Type</span><select id="f-atype">${selectOptions(ACTIVITY_TYPES, a?a.type:ACTIVITY_TYPES[0])}</select></label>
+      <label class="field"><span class="lbl">Status</span><select id="f-astatus">${selectOptions(ACTIVITY_STATUSES, a?a.status:"Not Started")}</select></label>
+      <label class="field"><span class="lbl">Person</span><select id="f-aperson">${personSelectOptions(a?a.personId:"")}</select></label>
+      <label class="field"><span class="lbl">Church (optional)</span><select id="f-achurch">${churchSelectOptions(a?a.churchId:"")}</select></label>
+      <label class="field"><span class="lbl">Date</span><input type="date" id="f-adate" value="${a?a.date:new Date().toISOString().slice(0,10)}"></label>
+      <label class="field"><span class="lbl">Due Date (for follow-ups)</span><input type="date" id="f-adue" value="${a?a.dueDate||'':''}"></label>
+      <label class="field"><span class="lbl">Priority</span><select id="f-apriority">${selectOptions(PRIORITIES, a?a.priority:"Normal")}</select></label>
+      <label class="field"><span class="lbl">Owner</span><input id="f-aowner" value="${a?a.owner||'':''}"></label>
+    </div>
+    <label class="field"><span class="lbl">Notes</span><textarea id="f-anotes">${a?a.notes||'':''}</textarea></label>
+    <div class="modal-foot">
+      <span>${a?`<button class="btn btn-danger" onclick="deleteActivity('${a.id}')">Delete</button>`:''}</span>
+      <span style="display:flex;gap:8px;"><button class="btn" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="saveActivity(${a?`'${a.id}'`:'null'})">Save</button></span>
+    </div>`;
+  openModal(html);
+}
+async function saveActivity(id){
+  const val=(x)=>document.getElementById(x).value;
+  const data = {type: val("f-atype"), status: val("f-astatus"), personId: val("f-aperson")||null, churchId: val("f-achurch")||null, date: val("f-adate"), dueDate: val("f-adue"), priority: val("f-apriority"), owner: val("f-aowner"), notes: val("f-anotes")};
+  if(id) Object.assign(STATE.activities.find(x=>x.id===id), data);
+  else STATE.activities.push({id: uid("a"), ...data});
+  // touch last contact on person if applicable
+  if(data.personId){
+    const p = STATE.people.find(x=>x.id===data.personId);
+    if(p && data.status==="Completed" && (!p.lastContact || new Date(data.date) > new Date(p.lastContact))) p.lastContact = data.date;
+  }
+  await persist(); closeModal(); showToast("Activity saved."); renderAll();
+}
+async function deleteActivity(id){
+  STATE.activities = STATE.activities.filter(a=>a.id!==id);
+  await persist(); closeModal(); showToast("Activity deleted."); renderAll();
+}
+
+/* =========================================================================
+   TEAMS / PROVINCES
+   ========================================================================= */
+function renderTeams(){
+  document.getElementById("districts-list").innerHTML = DISTRICTS.map(d=>{
+    const churchCt = STATE.churches.filter(c=>d.provinces.includes(c.province)).length;
+    const facCt = STATE.people.filter(p=>d.provinces.includes(p.province) && p.facilitatorStatus==="Active").length;
+    return `<div style="padding:10px 0;border-bottom:1px solid #EFEBDF;">
+      <div style="font-weight:700;font-size:13px;">${d.name}</div>
+      <div class="small">${d.provinces.join(", ")}</div>
+      <div class="small" style="margin-top:3px;">${churchCt} churches · ${facCt} active facilitators</div>
+    </div>`;
+  }).join("");
+  document.getElementById("coreteams-list").innerHTML = CORE_TEAMS.map(t=>{
+    const churchCt = STATE.churches.filter(c=>t.provinces.includes(c.province)).length;
+    const facCt = STATE.people.filter(p=>t.provinces.includes(p.province) && p.facilitatorStatus==="Active").length;
+    return `<div style="padding:10px 0;border-bottom:1px solid #EFEBDF;">
+      <div style="font-weight:700;font-size:13px;">${t.name}</div>
+      <div class="small">${t.provinces.join(", ")}</div>
+      <div class="small" style="margin-top:3px;">${churchCt} churches · ${facCt} active facilitators</div>
+    </div>`;
+  }).join("");
+
+  document.getElementById("province-table-body").innerHTML = PROVINCES_SEED.map(pr=>{
+    const churchCt = STATE.churches.filter(c=>c.province===pr.name).length;
+    const peopleCt = STATE.people.filter(p=>p.province===pr.name).length;
+    const facCt = STATE.people.filter(p=>p.province===pr.name && p.facilitatorStatus==="Active").length;
+    return `<tr><td><strong>${pr.name}</strong></td><td class="small">${pr.district}</td><td class="small">${pr.coreTeam}</td><td>${churchCt}</td><td>${peopleCt}</td><td>${facCt}</td></tr>`;
+  }).join("");
+}
+
+/* =========================================================================
+   WIG
+   ========================================================================= */
+function renderWig(){
+  document.getElementById("wig-desc").textContent = WIG.label;
+  const activeFacs = STATE.people.filter(p=>p.facilitatorStatus==="Active").length;
+  const inactiveOrReeng = STATE.people.filter(p=>p.facilitatorStatus==="Inactive"||p.facilitatorStatus==="Re-engagement").length;
+  const gap = Math.max(0, WIG.target - activeFacs);
+  const pct = Math.min(100, Math.max(0, Math.round((activeFacs-WIG.start)/(WIG.target-WIG.start)*100)));
+
+  document.getElementById("wig-stats").innerHTML = [
+    {k:"Starting Point", v:WIG.start},
+    {k:"Current", v:activeFacs},
+    {k:"Target", v:WIG.target},
+    {k:"Gap Remaining", v:gap},
+  ].map(s=>`<div class="card stat"><div class="k">${s.k}</div><div class="v">${s.v}</div></div>`).join("");
+
+  document.getElementById("wig-bar").style.width = pct+"%";
+  document.getElementById("wig-bar-label").textContent = `${pct}% achieved · ${fmtDate(WIG.deadline)} deadline · ${inactiveOrReeng} facilitators awaiting re-engagement`;
+
+  const trainedCt = new Set(STATE.completions.filter(c=>{ const m=STATE.modules.find(mm=>mm.id===c.moduleId); return m && m.name==="IAL"; }).map(c=>c.personId)).size;
+  const recruitedCt = STATE.people.filter(p=>p.facilitatorStatus==="New").length + STATE.people.filter(p=>p.facilitatorStatus==="Developing").length;
+  const deployedCt = STATE.events.filter(e=>e.status==="Completed").reduce((sum,e)=>sum+(e.participantIds||[]).length,0);
+  const reengagedLog = STATE.pipelineLog.filter(l=>l.note && l.note.toLowerCase().includes("re-engag")).length;
+  const leadVals = {recruited:recruitedCt, trained:trainedCt, deployed:deployedCt, reengaged:reengagedLog};
+
+  document.getElementById("wig-lead-measures").innerHTML = WIG.leadMeasures.map(m=>{
+    const cur = leadVals[m.key]||0;
+    const p = Math.min(100, Math.round(cur/m.target*100));
+    return `<div style="margin-bottom:14px;">
+      <div style="display:flex;justify-content:space-between;font-size:12.8px;font-weight:700;"><span>${m.name}</span><span class="mono">${cur} / ${m.target}</span></div>
+      <div class="small" style="margin:3px 0 6px;">${m.detail}</div>
+      <div class="prog-track"><div class="prog-fill" style="width:${p}%"></div></div>
+    </div>`;
+  }).join("");
+
+  const provRows = PROVINCES_SEED.map(pr=>{
+    const facCt = STATE.people.filter(p=>p.province===pr.name && p.facilitatorStatus==="Active").length;
+    return {name:pr.name, facCt};
+  }).sort((a,b)=>b.facCt-a.facCt);
+  document.getElementById("wig-province-table").innerHTML = `<table><thead><tr><th>Province</th><th>Active Facilitators</th></tr></thead><tbody>
+    ${provRows.map(r=>`<tr><td>${r.name}</td><td><strong>${r.facCt}</strong></td></tr>`).join("")}
+  </tbody></table>`;
+}
+
+/* =========================================================================
+   REPORTS
+   ========================================================================= */
+async function saveReportText(){
+  STATE.reportE = document.getElementById("report-e").value;
+  await persist();
+}
+function renderReports(){
+  const c = computeCounts();
+  const now = new Date();
+  const trainingsCompleted = STATE.events.filter(e=>e.status==="Completed" && new Date(e.date).getMonth()===now.getMonth()).length;
+  const coachingSessions = STATE.activities.filter(a=>a.type==="Coaching" && a.status==="Completed").length;
+  const newPeopleThisMonth = STATE.people.filter(p=>{ if(!p.lastContact) return false; }).length; // placeholder metric
+
+  document.getElementById("report-stats").innerHTML = [
+    {k:"Active Facilitators", v:c.activeFac},
+    {k:"Trainings Completed (this month)", v:trainingsCompleted},
+    {k:"Coaching Sessions Logged", v:coachingSessions},
+    {k:"Overdue Follow-ups", v:c.overdue},
+  ].map(s=>`<div class="stat"><div class="k">${s.k}</div><div class="v">${s.v}</div></div>`).join("");
+
+  document.getElementById("report-e").value = STATE.reportE || "";
+
+  const overdue = STATE.activities.filter(a=>a.dueDate && a.status!=="Completed" && a.status!=="Cancelled" && isOverdue(a.dueDate));
+  const inactiveFacs = STATE.people.filter(p=>p.facilitatorStatus==="Inactive"||p.facilitatorStatus==="Re-engagement");
+  document.getElementById("report-matters").innerHTML = (overdue.length||inactiveFacs.length) ? `
+    ${overdue.length?`<div class="callout callout-rust" style="margin-bottom:8px;">${overdue.length} overdue follow-up${overdue.length>1?'s':''}: ${overdue.map(a=>personName(a.personId)).join(", ")}</div>`:''}
+    ${inactiveFacs.length?`<div class="callout callout-gold">${inactiveFacs.length} facilitator${inactiveFacs.length>1?'s':''} need re-engagement: ${inactiveFacs.map(p=>p.name).join(", ")}</div>`:''}
+  ` : `<div class="empty">No pressing matters this period.</div>`;
+
+  const steps = [];
+  overdue.forEach(a=>steps.push(`Close out the overdue ${a.type.toLowerCase()} for ${personName(a.personId)} (owner: ${a.owner||"unassigned"}).`));
+  inactiveFacs.forEach(p=>steps.push(`Schedule a re-engagement conversation with ${p.name} in ${p.province}.`));
+  const planned = STATE.events.filter(e=>e.status==="Planned"||e.status==="Confirmed").slice(0,3);
+  planned.forEach(e=>steps.push(`Confirm logistics for "${e.title}" on ${fmtDate(e.date)} in ${e.province}.`));
+  document.getElementById("report-strategic").innerHTML = steps.length ? `<ul style="margin:0;padding-left:18px;">${steps.map(s=>`<li style="margin-bottom:6px;font-size:13px;">${s}</li>`).join("")}</ul>` : `<div class="empty">No open strategic actions.</div>`;
+}
+
+/* =========================================================================
+   MASTER RENDER
+   ========================================================================= */
+function renderAll(){
+  renderDashboard();
+  populatePeopleFilters(); renderPeople();
+  populateChurchFilters(); renderChurches();
+  renderPipeline();
+  renderModules(); populateEventFilters(); renderEvents(); renderReadiness();
+  populateActivityFilters(); renderActivities();
+  renderTeams();
+  renderWig();
+  renderReports();
+}
+
+(async function init(){
+  await loadState();
+  renderAll();
+})();
+</script>
+</body>
+</html>
