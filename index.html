@@ -68,6 +68,10 @@ label.field .lbl{display:block;font-size:11px;font-weight:600;color:var(--muted)
 .stat .v{font-family:'Fraunces',serif;font-size:27px;font-weight:600;color:var(--ink);margin-top:5px;}
 .stat .d{font-size:11.5px;color:var(--teal);margin-top:3px;font-weight:600;}
 .stat .d.warn{color:var(--rust);}
+.growth-ind{display:inline-flex;align-items:center;gap:3px;font-size:11.5px;font-weight:700;padding:2px 8px;border-radius:100px;}
+.growth-up{background:var(--teal-soft);color:var(--teal);}
+.growth-down{background:var(--rust-soft);color:var(--rust);}
+.growth-flat{background:#ECE9DF;color:#665F52;}
 
 .section-title{font-size:14.5px;font-weight:700;margin:0 0 11px;color:var(--ink);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;}
 
@@ -81,6 +85,9 @@ tbody tr{cursor:pointer;transition:background .1s;} tbody tr:hover{background:#F
 .pill-gold{background:var(--gold-soft);color:#7A5B15;} .pill-teal{background:var(--teal-soft);color:var(--teal);}
 .pill-rust{background:var(--rust-soft);color:var(--rust);} .pill-grey{background:#ECE9DF;color:#665F52;}
 .pill-blue{background:var(--blue-soft);color:var(--blue);}
+.pill-deep{background:var(--ink);color:#F5EFDD;}
+.level-meter{display:flex;gap:3px;}
+.level-meter .seg{width:16px;height:8px;border-radius:3px;background:#ECE7D8;}
 
 .tabs{display:flex;gap:4px;margin-bottom:16px;border-bottom:1px solid var(--border);flex-wrap:wrap;}
 .tab{padding:8px 13px;font-size:12.5px;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;}
@@ -178,7 +185,12 @@ textarea{min-height:70px;resize:vertical;}
 
   <div class="navgroup">
     <div class="navgroup-label">Dashboards</div>
-    <div class="navitem" data-view="dashboards"><span class="ic">&#128202;</span> District &amp; Team Dashboards</div>
+    <div class="navitem" data-view="dashboards"><span class="ic">&#128202;</span> District, Team &amp; Province Dashboards</div>
+  </div>
+
+  <div class="navgroup">
+    <div class="navgroup-label">Growth Framework</div>
+    <div class="navitem" data-view="growth"><span class="ic">&#127793;</span> Province Growth Indicators</div>
   </div>
 
   <div class="navgroup">
@@ -279,13 +291,14 @@ textarea{min-height:70px;resize:vertical;}
     </div>
     <div class="toolbar">
       <input type="search" id="people-search" placeholder="Search name, role, church…" oninput="renderPeople()">
+      <select id="people-filter-category" onchange="renderPeople()"><option value="">All categories</option></select>
       <select id="people-filter-stage" onchange="renderPeople()"><option value="">All pipeline stages</option></select>
       <select id="people-filter-district" onchange="renderPeople()"><option value="">All districts</option></select>
       <select id="people-filter-province" onchange="renderPeople()"><option value="">All provinces</option></select>
       <span class="count-chip" id="people-count"></span>
     </div>
     <div class="card"><div class="table-wrap"><table id="people-table"><thead><tr>
-      <th>Name</th><th>Pipeline Stage</th><th>Church</th><th>Province</th><th>District</th><th>Facilitator Status</th><th>Last Contact</th><th>Next Follow-up</th>
+      <th>Name</th><th>Category</th><th>Pipeline Stage</th><th>Church</th><th>Province</th><th>District</th><th>Facilitator Status</th><th>Last Contact</th><th>Next Follow-up</th>
     </tr></thead><tbody></tbody></table></div></div>
   </section>
 
@@ -345,14 +358,15 @@ textarea{min-height:70px;resize:vertical;}
     <div class="card"><div class="section-title">Stage-Change History</div><div class="table-wrap"><table><thead><tr><th>Date</th><th>Person</th><th>From</th><th>To</th><th>Note</th></tr></thead><tbody id="pipeline-log-body"></tbody></table></div></div>
   </section>
 
-  <!-- ============ DISTRICT & TEAM DASHBOARDS ============ -->
+  <!-- ============ DISTRICT & TEAM & PROVINCIAL DASHBOARDS ============ -->
   <section class="view" id="view-dashboards">
     <div class="pagehead">
-      <div><h1>District &amp; Team Dashboards</h1><div class="desc">Drill down into any district or team's performance for the current fiscal year.</div></div>
+      <div><h1>District, Team &amp; Provincial Dashboards</h1><div class="desc">Drill down into any district, team, or province's performance for the current fiscal year — including growth vs. an editable baseline.</div></div>
     </div>
     <div class="tabs">
       <div class="tab active" data-tab="dashboards" data-sub="dash-district">District Dashboard</div>
       <div class="tab" data-tab="dashboards" data-sub="dash-team">Team Dashboard</div>
+      <div class="tab" data-tab="dashboards" data-sub="dash-province">Provincial Dashboard</div>
     </div>
     <div class="subview active" id="dash-district">
       <div class="scope-select-bar"><label>District</label><select id="district-dash-select" onchange="renderDistrictDashboard()"></select></div>
@@ -362,7 +376,41 @@ textarea{min-height:70px;resize:vertical;}
       <div class="scope-select-bar"><label>Team</label><select id="team-dash-select" onchange="renderTeamDashboard()"></select></div>
       <div id="team-dash-content"></div>
     </div>
+    <div class="subview" id="dash-province">
+      <div class="scope-select-bar">
+        <label>Province</label><select id="province-dash-select" onchange="renderProvinceDashboard()"></select>
+        <button class="btn btn-sm" style="margin-left:auto;" onclick="openProvinceGrowthForm(currentProvinceDashId())">✎ Edit Growth Baseline &amp; Target</button>
+      </div>
+      <div id="province-dash-content"></div>
+      <div class="card" style="margin-top:16px;">
+        <div class="section-title">Provincial Growth Overview <span class="small">All provinces · current vs. editable baseline</span></div>
+        <div class="table-wrap" id="province-growth-overview"></div>
+      </div>
+    </div>
   </section>
+
+  <!-- ============ PROVINCE GROWTH INDICATORS (9-Indicator Ministry Maturity Framework) ============ -->
+  <section class="view" id="view-growth">
+    <div class="pagehead">
+      <div><h1>Province Growth Indicators</h1><div class="desc">ECC PH Province Growth Indicators Framework — Version 1. Nine ministry indicators, each scored from Level 1 (Emerging) to Level 5 (Movement), to guide coaching, reporting, and strategic decisions. Distinct from the numeric growth dashboard — this measures ministry maturity, not headcount.</div></div>
+    </div>
+    <div class="tabs">
+      <div class="tab active" data-tab="growth" data-sub="growth-assess">Province Assessment</div>
+      <div class="tab" data-tab="growth" data-sub="growth-matrix">National Matrix</div>
+      <div class="tab" data-tab="growth" data-sub="growth-framework">Indicator Framework</div>
+    </div>
+    <div class="subview active" id="growth-assess">
+      <div class="scope-select-bar"><label>Province</label><select id="growth-province-select" onchange="renderGrowthAssessment()"></select></div>
+      <div id="growth-assess-content"></div>
+    </div>
+    <div class="subview" id="growth-matrix">
+      <div id="growth-matrix-content"></div>
+    </div>
+    <div class="subview" id="growth-framework">
+      <div id="growth-framework-content"></div>
+    </div>
+  </section>
+
 
   <!-- ============ LMS ============ -->
   <section class="view" id="view-lms">
@@ -478,6 +526,7 @@ textarea{min-height:70px;resize:vertical;}
     <div class="tabs">
       <div class="tab active" data-tab="admin" data-sub="admin-overview">Overview</div>
       <div class="tab" data-tab="admin" data-sub="admin-fy">Fiscal Years</div>
+      <div class="tab" data-tab="admin" data-sub="admin-categories">People Categories</div>
       <div class="tab" data-tab="admin" data-sub="admin-data">Data Tools</div>
     </div>
     <div class="subview active" id="admin-overview">
@@ -494,6 +543,13 @@ textarea{min-height:70px;resize:vertical;}
     <div class="subview" id="admin-fy">
       <div class="pagehead" style="margin-bottom:10px;"><div></div><div class="actions"><button class="btn btn-sm btn-primary" onclick="openFyForm()">+ Add Fiscal Year</button></div></div>
       <div class="card"><div class="table-wrap"><table><thead><tr><th>Fiscal Year</th><th>Range</th><th>Current</th><th></th></tr></thead><tbody id="admin-fy-body"></tbody></table></div></div>
+    </div>
+    <div class="subview" id="admin-categories">
+      <div class="card" style="max-width:460px;">
+        <div class="section-title">People Category Options <button class="btn btn-sm" onclick="addPeopleCategoryOption()">+ Add Option</button></div>
+        <div class="small" style="margin-bottom:10px;">These appear as the "Category" choices when adding or editing a person — e.g. Worker, Volunteer, Partner, Partner Organization. Rename, remove, or add your own.</div>
+        <div id="people-category-options-list"></div>
+      </div>
     </div>
     <div class="subview" id="admin-data">
       <div class="card">
@@ -560,25 +616,26 @@ function seedData(){
   ];
 
   const provinceStatusOptions = ["Matured","Growing","New","Emerging","Inactive","Other"];
+  const peopleCategoryOptions = ["Worker","Volunteer","Partner","Partner Organization"];
 
   const provinces = [
-    {id:"pr1", name:"Leyte", districtId:"d5", teamId:"t2", coordinator:"", status:"Emerging", notes:""},
-    {id:"pr2", name:"Eastern Samar", districtId:"d5", teamId:"t2", coordinator:"", status:"Growing", notes:""},
-    {id:"pr3", name:"Western Samar", districtId:"d5", teamId:"t2", coordinator:"Marlon Uy", status:"Inactive", notes:"Prime re-engagement target."},
-    {id:"pr4", name:"Northern Samar", districtId:"d5", teamId:"t2", coordinator:"Ferdie Alcantara", status:"Growing", notes:""},
-    {id:"pr5", name:"Pangasinan", districtId:"d4", teamId:"t1", coordinator:"Danilo Cruz", status:"Matured", notes:""},
-    {id:"pr6", name:"Tarlac", districtId:"d4", teamId:"t1", coordinator:"", status:"New", notes:"Newly added under District 4."},
-    {id:"pr7", name:"Aurora", districtId:"d1", teamId:"t1", coordinator:"", status:"New", notes:""},
-    {id:"pr8", name:"Nueva Ecija", districtId:"d1", teamId:"t1", coordinator:"Ligaya Reyes", status:"Matured", notes:""},
-    {id:"pr9", name:"Quezon", districtId:"d1", teamId:"t4", coordinator:"", status:"Growing", notes:""},
-    {id:"pr10", name:"Camarines Sur", districtId:"d1", teamId:"t4", coordinator:"Ramil Ortega", status:"Matured", notes:""},
-    {id:"pr11", name:"La Union", districtId:"d2", teamId:"t3", coordinator:"", status:"Emerging", notes:""},
-    {id:"pr12", name:"Palawan", districtId:"d2", teamId:"t3", coordinator:"Jun Mercado", status:"Growing", notes:""},
-    {id:"pr13", name:"Oriental Mindoro", districtId:"d2", teamId:"t3", coordinator:"", status:"New", notes:""},
-    {id:"pr14", name:"Occidental Mindoro", districtId:"d2", teamId:"t3", coordinator:"", status:"New", notes:""},
-    {id:"pr15", name:"Albay", districtId:"d3", teamId:"t4", coordinator:"", status:"Emerging", notes:""},
-    {id:"pr16", name:"Zambales", districtId:"d1", teamId:"t4", coordinator:"Grace Lim", status:"Growing", notes:""},
-    {id:"pr17", name:"Rizal", districtId:"d3", teamId:"t4", coordinator:"Noel Santos", status:"New", notes:""},
+    {id:"pr1", name:"Leyte", districtId:"d5", teamId:"t2", coordinator:"", status:"Emerging", notes:"", baselineActiveFacilitators:0, baselineChurches:0, baselinePeople:0, growthTargetPct:15},
+    {id:"pr2", name:"Eastern Samar", districtId:"d5", teamId:"t2", coordinator:"", status:"Growing", notes:"", baselineActiveFacilitators:0, baselineChurches:0, baselinePeople:0, growthTargetPct:15},
+    {id:"pr3", name:"Western Samar", districtId:"d5", teamId:"t2", coordinator:"Marlon Uy", status:"Inactive", notes:"Prime re-engagement target.", baselineActiveFacilitators:2, baselineChurches:1, baselinePeople:3, growthTargetPct:15},
+    {id:"pr4", name:"Northern Samar", districtId:"d5", teamId:"t2", coordinator:"Ferdie Alcantara", status:"Growing", notes:"", baselineActiveFacilitators:0, baselineChurches:0, baselinePeople:0, growthTargetPct:15},
+    {id:"pr5", name:"Pangasinan", districtId:"d4", teamId:"t1", coordinator:"Danilo Cruz", status:"Matured", notes:"", baselineActiveFacilitators:1, baselineChurches:1, baselinePeople:2, growthTargetPct:25},
+    {id:"pr6", name:"Tarlac", districtId:"d4", teamId:"t1", coordinator:"", status:"New", notes:"Newly added under District 4.", baselineActiveFacilitators:0, baselineChurches:0, baselinePeople:0, growthTargetPct:50},
+    {id:"pr7", name:"Aurora", districtId:"d1", teamId:"t1", coordinator:"", status:"New", notes:"", baselineActiveFacilitators:0, baselineChurches:0, baselinePeople:0, growthTargetPct:15},
+    {id:"pr8", name:"Nueva Ecija", districtId:"d1", teamId:"t1", coordinator:"Ligaya Reyes", status:"Matured", notes:"", baselineActiveFacilitators:1, baselineChurches:1, baselinePeople:2, growthTargetPct:20},
+    {id:"pr9", name:"Quezon", districtId:"d1", teamId:"t4", coordinator:"", status:"Growing", notes:"", baselineActiveFacilitators:0, baselineChurches:0, baselinePeople:0, growthTargetPct:15},
+    {id:"pr10", name:"Camarines Sur", districtId:"d1", teamId:"t4", coordinator:"Ramil Ortega", status:"Matured", notes:"", baselineActiveFacilitators:1, baselineChurches:1, baselinePeople:2, growthTargetPct:10},
+    {id:"pr11", name:"La Union", districtId:"d2", teamId:"t3", coordinator:"", status:"Emerging", notes:"", baselineActiveFacilitators:0, baselineChurches:0, baselinePeople:0, growthTargetPct:15},
+    {id:"pr12", name:"Palawan", districtId:"d2", teamId:"t3", coordinator:"Jun Mercado", status:"Growing", notes:"", baselineActiveFacilitators:1, baselineChurches:1, baselinePeople:2, growthTargetPct:30},
+    {id:"pr13", name:"Oriental Mindoro", districtId:"d2", teamId:"t3", coordinator:"", status:"New", notes:"", baselineActiveFacilitators:0, baselineChurches:1, baselinePeople:1, growthTargetPct:15},
+    {id:"pr14", name:"Occidental Mindoro", districtId:"d2", teamId:"t3", coordinator:"", status:"New", notes:"", baselineActiveFacilitators:0, baselineChurches:0, baselinePeople:0, growthTargetPct:15},
+    {id:"pr15", name:"Albay", districtId:"d3", teamId:"t4", coordinator:"", status:"Emerging", notes:"", baselineActiveFacilitators:0, baselineChurches:0, baselinePeople:0, growthTargetPct:15},
+    {id:"pr16", name:"Zambales", districtId:"d3", teamId:"t4", coordinator:"Grace Lim", status:"Growing", notes:"", baselineActiveFacilitators:1, baselineChurches:1, baselinePeople:2, growthTargetPct:10},
+    {id:"pr17", name:"Rizal", districtId:"d3", teamId:"t4", coordinator:"Noel Santos", status:"New", notes:"", baselineActiveFacilitators:0, baselineChurches:1, baselinePeople:1, growthTargetPct:15},
   ];
 
   const churches = [
@@ -594,23 +651,25 @@ function seedData(){
   ];
 
   const people = [
-    {id:"p1", name:"Emil Gonzales", role:"District Coordinator", stage:"Multiplying Leader", churchId:"c2", province:"Nueva Ecija", facilitatorStatus:"Active", phone:"0917-555-0102", email:"emil.g@eccph.org", status:"Active", lastContact:"2026-08-10", nextFollowUp:"2026-08-25", notes:"Leads District 2."},
-    {id:"p2", name:"Karl Domingo", role:"Core Team Leader", stage:"Team Leader", churchId:"c1", province:"Pangasinan", facilitatorStatus:"Active", phone:"0917-555-0110", email:"karl.d@eccph.org", status:"Active", lastContact:"2026-08-05", nextFollowUp:"2026-08-20", notes:""},
-    {id:"p3", name:"Grace Lim", role:"Pastor", stage:"Team Leader", churchId:"c7", province:"Zambales", facilitatorStatus:"Active", phone:"0917-555-0134", email:"grace.l@eccph.org", status:"Active", lastContact:"2026-07-28", nextFollowUp:"2026-08-18", notes:""},
-    {id:"p4", name:"Ramil Ortega", role:"Pastor", stage:"Multiplying Leader", churchId:"c6", province:"Camarines Sur", facilitatorStatus:"Active", phone:"0917-555-0145", email:"", status:"Active", lastContact:"2026-08-01", nextFollowUp:"2026-09-01", notes:""},
-    {id:"p5", name:"Noel Santos", role:"Pastor", stage:"Emerging Leader", churchId:"c3", province:"Rizal", facilitatorStatus:"New", phone:"0917-555-0177", email:"", status:"Active", lastContact:"2026-07-15", nextFollowUp:"2026-08-19", notes:"Needs orientation to CRM and coaching cycle."},
-    {id:"p6", name:"Jun Mercado", role:"Pastor", stage:"Facilitator", churchId:"c4", province:"Palawan", facilitatorStatus:"Active", phone:"0917-555-0188", email:"", status:"Active", lastContact:"2026-08-02", nextFollowUp:"2026-08-30", notes:""},
-    {id:"p7", name:"Ana Villaflor", role:"Pastor", stage:"Participant", churchId:"c5", province:"Oriental Mindoro", facilitatorStatus:"", phone:"0917-555-0199", email:"", status:"Needs Verification", lastContact:"2025-05-20", nextFollowUp:"2026-08-22", notes:"First contact only — needs verification."},
-    {id:"p8", name:"Marlon Uy", role:"Pastor", stage:"Facilitator", churchId:"c8", province:"Western Samar", facilitatorStatus:"Inactive", phone:"0917-555-0212", email:"", status:"Inactive", lastContact:"2026-02-11", nextFollowUp:"2026-08-16", notes:"Prime candidate for re-engagement."},
-    {id:"p9", name:"Ligaya Reyes", role:"Pastor", stage:"Multiplying Leader", churchId:"c2", province:"Nueva Ecija", facilitatorStatus:"Active", phone:"0917-555-0223", email:"", status:"Active", lastContact:"2026-08-12", nextFollowUp:"2026-09-05", notes:""},
-    {id:"p10", name:"Danilo Cruz", role:"Pastor", stage:"Facilitator", churchId:"c1", province:"Pangasinan", facilitatorStatus:"Active", phone:"0917-555-0234", email:"", status:"Active", lastContact:"2026-08-09", nextFollowUp:"2026-08-24", notes:""},
-    {id:"p11", name:"Rowena Fabros", role:"Emerging Facilitator", stage:"Emerging Leader", churchId:"c1", province:"Pangasinan", facilitatorStatus:"Developing", phone:"0917-555-0245", email:"", status:"Active", lastContact:"2026-07-30", nextFollowUp:"2026-08-17", notes:"Completed DMJ 1-3, needs IAL."},
-    {id:"p12", name:"Bong Pascual", role:"Recruit", stage:"Learner", churchId:"c6", province:"Camarines Sur", facilitatorStatus:"New", phone:"0917-555-0256", email:"", status:"Active", lastContact:"2026-08-03", nextFollowUp:"2026-08-21", notes:""},
-    {id:"p13", name:"Cristy Navarro", role:"Facilitator", stage:"Facilitator", churchId:"c7", province:"Zambales", facilitatorStatus:"Re-engagement", phone:"0917-555-0267", email:"", status:"Active", lastContact:"2026-06-01", nextFollowUp:"2026-08-15", notes:"Was active, went quiet after relocating."},
-    {id:"p14", name:"Edgar Villamor", role:"Recruit", stage:"Contact", churchId:null, province:"Palawan", facilitatorStatus:"", phone:"", email:"", status:"Needs Verification", lastContact:"2026-08-01", nextFollowUp:"2026-08-18", notes:"Contact info unconfirmed."},
-    {id:"p15", name:"Melissa Tan", role:"Facilitator", stage:"Facilitator", churchId:"c4", province:"Palawan", facilitatorStatus:"Active", phone:"0917-555-0278", email:"", status:"Active", lastContact:"2026-08-06", nextFollowUp:"2026-08-27", notes:""},
-    {id:"p16", name:"Ferdie Alcantara", role:"Facilitator", stage:"Facilitator", churchId:"c8", province:"Western Samar", facilitatorStatus:"Active", phone:"0917-555-0289", email:"", status:"Active", lastContact:"2026-07-22", nextFollowUp:"2026-08-19", notes:""},
-    {id:"p17", name:"Ella Reyes", role:"Pastor", stage:"Participant", churchId:"c9", province:"Tarlac", facilitatorStatus:"New", phone:"0917-555-0301", email:"", status:"Active", lastContact:"2026-08-04", nextFollowUp:"2026-08-20", notes:"District 4 launch contact."},
+    {id:"p1", name:"Emil Gonzales", role:"District Coordinator", stage:"Multiplying Leader", churchId:"c2", province:"Nueva Ecija", facilitatorStatus:"Active", category:"Worker", partnerOrgName:"", phone:"0917-555-0102", email:"emil.g@eccph.org", status:"Active", lastContact:"2026-08-10", nextFollowUp:"2026-08-25", notes:"Leads District 2."},
+    {id:"p2", name:"Karl Domingo", role:"Core Team Leader", stage:"Team Leader", churchId:"c1", province:"Pangasinan", facilitatorStatus:"Active", category:"Worker", partnerOrgName:"", phone:"0917-555-0110", email:"karl.d@eccph.org", status:"Active", lastContact:"2026-08-05", nextFollowUp:"2026-08-20", notes:""},
+    {id:"p3", name:"Grace Lim", role:"Pastor", stage:"Team Leader", churchId:"c7", province:"Zambales", facilitatorStatus:"Active", category:"Worker", partnerOrgName:"", phone:"0917-555-0134", email:"grace.l@eccph.org", status:"Active", lastContact:"2026-07-28", nextFollowUp:"2026-08-18", notes:""},
+    {id:"p4", name:"Ramil Ortega", role:"Pastor", stage:"Multiplying Leader", churchId:"c6", province:"Camarines Sur", facilitatorStatus:"Active", category:"Worker", partnerOrgName:"", phone:"0917-555-0145", email:"", status:"Active", lastContact:"2026-08-01", nextFollowUp:"2026-09-01", notes:""},
+    {id:"p5", name:"Noel Santos", role:"Pastor", stage:"Emerging Leader", churchId:"c3", province:"Rizal", facilitatorStatus:"New", category:"Worker", partnerOrgName:"", phone:"0917-555-0177", email:"", status:"Active", lastContact:"2026-07-15", nextFollowUp:"2026-08-19", notes:"Needs orientation to CRM and coaching cycle."},
+    {id:"p6", name:"Jun Mercado", role:"Pastor", stage:"Facilitator", churchId:"c4", province:"Palawan", facilitatorStatus:"Active", category:"Worker", partnerOrgName:"", phone:"0917-555-0188", email:"", status:"Active", lastContact:"2026-08-02", nextFollowUp:"2026-08-30", notes:""},
+    {id:"p7", name:"Ana Villaflor", role:"Pastor", stage:"Participant", churchId:"c5", province:"Oriental Mindoro", facilitatorStatus:"", category:"Worker", partnerOrgName:"", phone:"0917-555-0199", email:"", status:"Needs Verification", lastContact:"2025-05-20", nextFollowUp:"2026-08-22", notes:"First contact only — needs verification."},
+    {id:"p8", name:"Marlon Uy", role:"Pastor", stage:"Facilitator", churchId:"c8", province:"Western Samar", facilitatorStatus:"Inactive", category:"Worker", partnerOrgName:"", phone:"0917-555-0212", email:"", status:"Inactive", lastContact:"2026-02-11", nextFollowUp:"2026-08-16", notes:"Prime candidate for re-engagement."},
+    {id:"p9", name:"Ligaya Reyes", role:"Pastor", stage:"Multiplying Leader", churchId:"c2", province:"Nueva Ecija", facilitatorStatus:"Active", category:"Worker", partnerOrgName:"", phone:"0917-555-0223", email:"", status:"Active", lastContact:"2026-08-12", nextFollowUp:"2026-09-05", notes:""},
+    {id:"p10", name:"Danilo Cruz", role:"Pastor", stage:"Facilitator", churchId:"c1", province:"Pangasinan", facilitatorStatus:"Active", category:"Worker", partnerOrgName:"", phone:"0917-555-0234", email:"", status:"Active", lastContact:"2026-08-09", nextFollowUp:"2026-08-24", notes:""},
+    {id:"p11", name:"Rowena Fabros", role:"Emerging Facilitator", stage:"Emerging Leader", churchId:"c1", province:"Pangasinan", facilitatorStatus:"Developing", category:"Volunteer", partnerOrgName:"", phone:"0917-555-0245", email:"", status:"Active", lastContact:"2026-07-30", nextFollowUp:"2026-08-17", notes:"Completed DMJ 1-3, needs IAL."},
+    {id:"p12", name:"Bong Pascual", role:"Recruit", stage:"Learner", churchId:"c6", province:"Camarines Sur", facilitatorStatus:"New", category:"Volunteer", partnerOrgName:"", phone:"0917-555-0256", email:"", status:"Active", lastContact:"2026-08-03", nextFollowUp:"2026-08-21", notes:""},
+    {id:"p13", name:"Cristy Navarro", role:"Facilitator", stage:"Facilitator", churchId:"c7", province:"Zambales", facilitatorStatus:"Re-engagement", category:"Volunteer", partnerOrgName:"", phone:"0917-555-0267", email:"", status:"Active", lastContact:"2026-06-01", nextFollowUp:"2026-08-15", notes:"Was active, went quiet after relocating."},
+    {id:"p14", name:"Edgar Villamor", role:"Recruit", stage:"Contact", churchId:null, province:"Palawan", facilitatorStatus:"", category:"Volunteer", partnerOrgName:"", phone:"", email:"", status:"Needs Verification", lastContact:"2026-08-01", nextFollowUp:"2026-08-18", notes:"Contact info unconfirmed."},
+    {id:"p15", name:"Melissa Tan", role:"Facilitator", stage:"Facilitator", churchId:"c4", province:"Palawan", facilitatorStatus:"Active", category:"Volunteer", partnerOrgName:"", phone:"0917-555-0278", email:"", status:"Active", lastContact:"2026-08-06", nextFollowUp:"2026-08-27", notes:""},
+    {id:"p16", name:"Ferdie Alcantara", role:"Facilitator", stage:"Facilitator", churchId:"c8", province:"Western Samar", facilitatorStatus:"Active", category:"Volunteer", partnerOrgName:"", phone:"0917-555-0289", email:"", status:"Active", lastContact:"2026-07-22", nextFollowUp:"2026-08-19", notes:""},
+    {id:"p17", name:"Ella Reyes", role:"Pastor", stage:"Participant", churchId:"c9", province:"Tarlac", facilitatorStatus:"New", category:"Worker", partnerOrgName:"", phone:"0917-555-0301", email:"", status:"Active", lastContact:"2026-08-04", nextFollowUp:"2026-08-20", notes:"District 4 launch contact."},
+    {id:"p18", name:"Atty. Ramon Dela Cruz", role:"Legal Partner", stage:"Contact", churchId:null, province:"Nueva Ecija", facilitatorStatus:"", category:"Partner", partnerOrgName:"", phone:"0917-555-0399", email:"", status:"Active", lastContact:"2026-06-15", nextFollowUp:"2026-09-15", notes:"Provides pro bono legal counsel for church registration matters."},
+    {id:"p19", name:"World Vision Philippines", role:"Partner Organization Liaison", stage:"Contact", churchId:null, province:"", facilitatorStatus:"", category:"Partner Organization", partnerOrgName:"World Vision Philippines", phone:"", email:"partnerships@worldvision.org.ph", status:"Active", lastContact:"2026-07-01", nextFollowUp:"2026-09-01", notes:"National partner supporting community development initiatives alongside ECC PH."},
   ];
 
   const modules = [
@@ -733,7 +792,111 @@ function seedData(){
     {id:"st2", personId:"p11", churchId:"c1", date:"2026-06-05", story:"Rowena moved from Learner to Emerging Leader after completing all four DMJ modules — now mentoring two new recruits herself.", tag:"Leadership Growth"},
   ];
 
-  return {fiscalYears, districts, teams, provinces, provinceStatusOptions, churches, people, modules, pathways, events, completions, assessments, certifications, activities, pipelineLog, wigs, reportTemplates, reports, stories};
+  /* ---- ECC PH Province Growth Indicators Framework — Version 1 ---- */
+  const growthIndicatorDefs = [
+    {id:"gi1", name:"Leader Development", description:"Measures the development, spiritual maturity, coaching culture, and multiplication of ECC PH leaders through Leadership Development Groups (LDGs), mentoring relationships, and leadership reproduction.",
+      levels:[
+        {level:1, stage:"Emerging Leaders", qualitative:"Potential leaders are identified and introduced to ministry opportunities and leadership development.", quantitative:["Emerging leaders identified","Leaders attending ministry activities or trainings","Initial participation in LDGs"]},
+        {level:2, stage:"Engaged Leaders", qualitative:"Leaders are actively participating in Leadership Development Groups and beginning to coach others while growing in accountability and character.", quantitative:["Active LDGs functioning","Leaders coaching 1–2 individuals","Regular participation in leadership gatherings"]},
+        {level:3, stage:"Multiplying Leaders", qualitative:"Leaders intentionally disciple and coach emerging leaders while reproducing additional LDGs.", quantitative:["Coaching at least 3 leaders","Multiple LDGs operating","New LDGs established"]},
+        {level:4, stage:"Network Leaders", qualitative:"Leaders oversee multiple ministry teams or CMFs through healthy coaching and leadership systems.", quantitative:["Coaching 2–3 CMFs or ministry networks","Leadership coaching systems functioning","Leaders consistently reproducing new leaders"]},
+        {level:5, stage:"Movement Leaders", qualitative:"Leadership multiplication becomes embedded within the province, producing leaders who influence other provinces and national initiatives.", quantitative:["Province-wide coaching culture","Leaders serving beyond the province","Sustainable leadership multiplication"]},
+      ]},
+    {id:"gi2", name:"Community Impact", description:"Measures the visible transformation of communities through evangelism, discipleship, compassion ministries, church engagement, and Kingdom influence resulting from ECC PH ministry.",
+      levels:[
+        {level:1, stage:"Awareness", qualitative:"A few pioneering churches in the province have begun intentional discipleship — new believers are being connected to mentors, but this hasn't yet spread to other churches or towns.", quantitative:["Occasional outreach activities","Initial communities reached"]},
+        {level:2, stage:"Engagement", qualitative:"Discipleship relationships are active in a growing number of churches across different towns, with believers beginning to share their faith — though depth still varies church to church.", quantitative:["Regular outreach schedules","Bible studies and home visitations","Increasing community participation"]},
+        {level:3, stage:"Influence", qualitative:"Multiple churches across the province are producing disciples who disciple others, with 2nd-generation disciples emerging in several towns — a recognizable pattern, not isolated stories.", quantitative:["Testimonies of transformed lives","Local leaders actively involved","Growing discipleship groups"]},
+        {level:4, stage:"Expansion", qualitative:"The province has raised up leaders (CMFs, DCMFs, coaches) coaching multiple disciple-makers across several churches — a coordinated system, not disconnected efforts.", quantitative:["Multiple barangays reached","New ministry groups or churches established"]},
+        {level:5, stage:"Saturation", qualitative:"Disciple-making is the normal, expected culture across the whole province — most/all towns are generating 3rd-generation-plus disciples, sustaining itself with minimal outside push.", quantitative:["Ministry active across most municipalities","Province-wide evangelism and discipleship initiatives"]},
+      ]},
+    {id:"gi3", name:"Disciple Multiplication", description:"Measures how effectively believers are discipled, equipped, and multiplied into disciple-makers who reproduce future generations of disciples.",
+      levels:[
+        {level:1, stage:"Emerging Discipleship", qualitative:"New believers begin their discipleship journey through intentional mentoring and spiritual formation.", quantitative:["#/% of churches with active discipleship groups","# of churches with peer accountability structures"]},
+        {level:2, stage:"Expanding Discipleship", qualitative:"Believers actively participate in discipleship relationships and begin sharing their faith with others.", quantitative:["# of churches with 2nd-generation disciples","# of towns/barangays with reproducing discipleship groups"]},
+        {level:3, stage:"Reproducing Discipleship", qualitative:"Disciples intentionally disciple others, resulting in second-generation disciples.", quantitative:["# of leaders/coaches coaching multiple disciple-makers","# of churches with disciple-making groups under active coaching"]},
+        {level:4, stage:"Coordinated Multiplication", qualitative:"Leaders strengthen multiple disciple-makers through coaching and multiplication systems.", quantitative:["#/% of towns with 3rd-generation-plus disciples","# of churches with self-sustaining disciple-making systems"]},
+        {level:5, stage:"Province-Wide Movement", qualitative:"Disciple-making becomes the normal culture across the province with ongoing generational multiplication.", quantitative:["#/% of churches with active discipleship groups","# of churches with peer accountability structures"]},
+      ]},
+    {id:"gi4", name:"Prayer Movement", description:"Measures the strength of corporate prayer, intercession, and spiritual unity among churches, leaders, and ministry networks throughout the province.",
+      levels:[
+        {level:1, stage:"Local Prayer Engagement", qualitative:"Churches gather regularly for corporate prayer and intercession.", quantitative:["Active prayer meetings","Local intercessors identified"]},
+        {level:2, stage:"Network Prayer Collaboration", qualitative:"Churches intentionally pray together through joint gatherings and ministry partnerships.", quantitative:["Joint prayer meetings conducted","Ministry partnerships strengthened"]},
+        {level:3, stage:"Provincial Prayer Leadership", qualitative:"Prayer mobilization operates consistently across the province.", quantitative:["Province-wide prayer gatherings","Coordinated prayer initiatives"]},
+        {level:4, stage:"Regional Prayer Coordination", qualitative:"Prayer leaders coordinate regional or district-wide prayer initiatives.", quantitative:["Regional prayer networks functioning"]},
+        {level:5, stage:"National Prayer Participation", qualitative:"The province actively contributes to national prayer movements and spiritual awakening.", quantitative:["Participation in national prayer initiatives"]},
+      ]},
+    {id:"gi5", name:"Economic Empowerment", description:"Measures the financial sustainability, stewardship, resource mobilization, and generosity of the province in supporting ministry and mission.",
+      levels:[
+        {level:1, stage:"Local Participation", qualitative:"Churches can host basic ministry events using available local resources.", quantitative:["Local trainings or ministry events hosted"]},
+        {level:2, stage:"Shared Partnership Support", qualitative:"Churches collaborate by sharing facilities, logistics, facilitators, and financial resources.", quantitative:["Shared support systems functioning"]},
+        {level:3, stage:"Provincial Sustainability", qualitative:"The province independently funds its own ministry activities and training events.", quantitative:["Province-funded ministry initiatives"]},
+        {level:4, stage:"Regional Support Capacity", qualitative:"The province provides financial or logistical assistance to neighboring provinces.", quantitative:["Resources shared with nearby provinces"]},
+        {level:5, stage:"National Participation & Generosity", qualitative:"The province consistently supports national ministries, church planting, and missions through generous stewardship.", quantitative:["Self-funded national participation","Financial support for missions"]},
+      ]},
+    {id:"gi6", name:"Church Planting — Healthy Churches", description:"Measures the growth of healthy churches that intentionally reproduce new churches and develop generational church-planting movements.",
+      levels:[
+        {level:1, stage:"Vision Awareness", qualitative:"Churches understand and embrace the biblical vision of church planting.", quantitative:["Leaders exposed to church planting vision"]},
+        {level:2, stage:"Emerging Worship Communities", qualitative:"New worship gatherings and outreach communities begin to develop.", quantitative:["Active worship groups established"]},
+        {level:3, stage:"Intentional Multiplication", qualitative:"Churches intentionally reproduce first- through third-generation churches.", quantitative:["Generation 1–3 churches established"]},
+        {level:4, stage:"Missional Church Networks", qualitative:"Fourth-generation churches function with healthy multiplication systems.", quantitative:["Fourth-generation churches established"]},
+        {level:5, stage:"Generational Movement", qualitative:"A sustainable church-planting movement is evident across the province.", quantitative:["Fifth-generation churches functioning"]},
+      ]},
+    {id:"gi7", name:"Collaboration", description:"Measures the level of Kingdom partnership, unity, and cooperation among ECC PH churches, leaders, ministries, and strategic partners.",
+      levels:[
+        {level:1, stage:"Initial Unity", qualitative:"Churches begin gathering together for fellowship and ministry.", quantitative:["Joint gatherings conducted"]},
+        {level:2, stage:"Shared Vision Collaboration", qualitative:"Churches intentionally work together toward shared ministry goals.", quantitative:["Two to three churches collaborating regularly"]},
+        {level:3, stage:"Growing Collaborative Influence", qualitative:"Churches cooperate in evangelism, discipleship, and Kingdom initiatives.", quantitative:["Shared outreach initiatives","Joint ministry activities"]},
+        {level:4, stage:"Structured Collaboration", qualitative:"Sustainable leadership structures and communication systems support collaboration.", quantitative:["Regular leadership meetings","Collaborative ministry plans implemented"]},
+        {level:5, stage:"Kingdom Unity Movement", qualitative:"Collaboration becomes a defining characteristic of the province, influencing the wider Body of Christ.", quantitative:["Sustained collaborative movements across the province"]},
+      ]},
+    {id:"gi8", name:"Team Development", description:"Measures the health, effectiveness, leadership capacity, and multiplication of provincial ministry teams.",
+      levels:[
+        {level:1, stage:"Forming Team", qualitative:"A provincial ministry team is identified and beginning to serve together.", quantitative:["Core team identified"]},
+        {level:2, stage:"Functional Team", qualitative:"Team members have defined responsibilities and work together effectively.", quantitative:["Regular team meetings","Shared ministry responsibilities"]},
+        {level:3, stage:"Developing Team", qualitative:"Team members lead ministry areas while mentoring future leaders.", quantitative:["Emerging second-line leaders"]},
+        {level:4, stage:"Multiplying Team", qualitative:"The team coaches and supports ministry teams in neighboring provinces.", quantitative:["Functional coaching systems","Cross-provincial support"]},
+        {level:5, stage:"Movement Team", qualitative:"The provincial team reproduces new teams and influences regional and national ministry development.", quantitative:["New teams established","Teams reproducing other teams"]},
+      ]},
+    {id:"gi9", name:"Training Development", description:"Measures the province's capacity to implement, reproduce, sustain, and continuously improve ECC PH training systems while developing competent facilitators and trainers.",
+      levels:[
+        {level:1, stage:"Training Exposure", qualitative:"Churches and leaders participate in ECC PH training opportunities.", quantitative:["Participants attending trainings"]},
+        {level:2, stage:"Training Implementation", qualitative:"The province organizes and hosts local training events.", quantitative:["Local trainings conducted"]},
+        {level:3, stage:"Training Reproduction", qualitative:"The province develops and equips new facilitators to reproduce training programs.", quantitative:["New facilitators trained and deployed"]},
+        {level:4, stage:"Training Sustainability", qualitative:"Coaching, evaluation, and quality improvement systems are functioning consistently.", quantitative:["Coaching systems established","Training evaluations conducted"]},
+        {level:5, stage:"Training Movement", qualitative:"The province produces trainers and facilitators who influence other provinces and national ministries.", quantitative:["National facilitators produced","Province supporting national training efforts"]},
+      ]},
+  ];
+
+  // Seeded province scores from the framework's Tab 2 assessment (order matches gi1..gi9)
+  const GROWTH_SCORES_BY_PROVINCE = {
+    "Leyte": [1,2,2,1,1,2,2,2,2],
+    "Eastern Samar": [1,1,1,1,1,1,1,1,2],
+    "Western Samar": [2,1,1,1,1,1,1,1,2],
+    "Northern Samar": [2,1,1,1,1,1,1,1,2],
+    "Aurora": [3,3,2,2,1,2,3,2,2],
+    "Nueva Ecija": [1,2,2,2,1,2,2,2,2],
+    "Quezon": [2,2,2,2,1,2,2,2,2],
+    "Camarines Sur": [1,2,2,1,1,2,2,2,2],
+    "Zambales": [2,2,2,1,2,2,2,1,2],
+    "Albay": [2,2,2,2,2,2,2,2,2],
+    "Rizal": [2,3,2,2,2,2,3,3,2],
+    "Tarlac": [1,3,1,1,2,3,1,1,2],
+    "Pangasinan": [2,3,2,2,2,2,3,1,3],
+    "Palawan": [1,2,2,2,1,2,2,2,2],
+    "La Union": [2,2,1,3,2,1,2,2,3],
+    "Occidental Mindoro": [1,2,1,1,2,1,2,1,2],
+    "Oriental Mindoro": [1,2,1,1,1,1,2,1,2],
+  };
+  const growthAssessments = [];
+  provinces.forEach(pr=>{
+    const scores = GROWTH_SCORES_BY_PROVINCE[pr.name];
+    growthIndicatorDefs.forEach((def,i)=>{
+      growthAssessments.push({id:`ga_${pr.id}_${def.id}`, provinceId:pr.id, indicatorId:def.id, level: scores ? scores[i] : 1, notes:"", lastAssessed:"2026-08-01"});
+    });
+  });
+
+  return {fiscalYears, districts, teams, provinces, provinceStatusOptions, peopleCategoryOptions, churches, people, modules, pathways, events, completions, assessments, certifications, activities, pipelineLog, wigs, reportTemplates, reports, stories, growthIndicatorDefs, growthAssessments};
 }
 
 /* =========================================================================
@@ -752,6 +915,7 @@ function migrateState(){
   if(!STATE.teams || !STATE.teams.length) STATE.teams = seed.teams;
   if(!STATE.provinces || !STATE.provinces.length) STATE.provinces = seed.provinces;
   if(!STATE.provinceStatusOptions) STATE.provinceStatusOptions = seed.provinceStatusOptions;
+  if(!STATE.peopleCategoryOptions || !STATE.peopleCategoryOptions.length) STATE.peopleCategoryOptions = seed.peopleCategoryOptions;
   if(!STATE.wigs) STATE.wigs = seed.wigs;
   if(!STATE.reportTemplates || !STATE.reportTemplates.length) STATE.reportTemplates = seed.reportTemplates;
   if(!STATE.reports) STATE.reports = [];
@@ -759,8 +923,31 @@ function migrateState(){
   if(!STATE.pathways || !STATE.pathways.length) STATE.pathways = seed.pathways;
   if(!STATE.assessments) STATE.assessments = [];
   if(!STATE.certifications) STATE.certifications = [];
+  if(!STATE.growthIndicatorDefs || !STATE.growthIndicatorDefs.length) STATE.growthIndicatorDefs = seed.growthIndicatorDefs;
+  if(!STATE.growthAssessments) STATE.growthAssessments = [];
+  // backfill growth-tracking fields on provinces saved before this feature existed
+  STATE.provinces.forEach(pr=>{
+    const curFac = STATE.people.filter(p=>p.province===pr.name && p.facilitatorStatus==="Active").length;
+    const curChurches = STATE.churches.filter(c=>c.province===pr.name).length;
+    const curPeople = STATE.people.filter(p=>p.province===pr.name).length;
+    if(pr.baselineActiveFacilitators===undefined) pr.baselineActiveFacilitators = curFac;
+    if(pr.baselineChurches===undefined) pr.baselineChurches = curChurches;
+    if(pr.baselinePeople===undefined) pr.baselinePeople = curPeople;
+    if(pr.growthTargetPct===undefined) pr.growthTargetPct = 15;
+  });
+  // ensure every province has an assessment row for every indicator (covers newly added provinces/indicators)
+  STATE.provinces.forEach(pr=>{
+    STATE.growthIndicatorDefs.forEach(def=>{
+      const exists = STATE.growthAssessments.some(a=>a.provinceId===pr.id && a.indicatorId===def.id);
+      if(!exists) STATE.growthAssessments.push({id:uid("ga"), provinceId:pr.id, indicatorId:def.id, level:1, notes:"", lastAssessed:""});
+    });
+  });
   // ensure people/events have new optional fields
-  STATE.people.forEach(p=>{ if(p.facilitatorStatus===undefined) p.facilitatorStatus=""; });
+  STATE.people.forEach(p=>{
+    if(p.facilitatorStatus===undefined) p.facilitatorStatus="";
+    if(p.category===undefined) p.category="Worker";
+    if(p.partnerOrgName===undefined) p.partnerOrgName="";
+  });
   STATE.events.forEach(e=>{ if(e.qaStage===undefined) e.qaStage="Participant Form"; if(e.feedback===undefined) e.feedback=""; if(e.debrief===undefined) e.debrief=""; if(e.actionPlan===undefined) e.actionPlan=""; });
   STATE.activities.forEach(a=>{ if(a.followUpStage===undefined) a.followUpStage=""; });
 }
@@ -837,6 +1024,7 @@ function isOverdue(d){ const n=daysUntil(d); return n!==null && n<0; }
 
 function pillForStage(stage){ const idx = PIPELINE_STAGES.indexOf(stage); const cls = idx>=4?"pill-gold":idx>=2?"pill-teal":"pill-grey"; return `<span class="pill ${cls}">${stage||"—"}</span>`; }
 function pillForFacStatus(s){ if(!s) return `<span class="small">—</span>`; const map = {Active:"pill-teal", Developing:"pill-gold", New:"pill-grey", Inactive:"pill-rust", "Re-engagement":"pill-rust"}; return `<span class="pill ${map[s]||'pill-grey'}">${s}</span>`; }
+function pillForCategory(cat){ if(!cat) return `<span class="small">—</span>`; const map = {Worker:"pill-teal", Volunteer:"pill-gold", Partner:"pill-blue", "Partner Organization":"pill-deep"}; return `<span class="pill ${map[cat]||'pill-grey'}">${cat}</span>`; }
 function pillForChurchStatus(s){ const map = {Prospect:"pill-grey", Connected:"pill-grey", Emerging:"pill-gold", Growing:"pill-teal", Mature:"pill-teal", Multiplying:"pill-gold", Inactive:"pill-rust"}; return `<span class="pill ${map[s]||'pill-grey'}">${s}</span>`; }
 function pillForActivityStatus(s){ const map = {"Not Started":"pill-grey","In Progress":"pill-gold","Waiting":"pill-grey","Completed":"pill-teal","Cancelled":"pill-rust"}; return `<span class="pill ${map[s]||'pill-grey'}">${s}</span>`; }
 function pillForPriority(p){ const map = {Critical:"pill-rust", High:"pill-gold", Normal:"pill-grey", Low:"pill-grey"}; return `<span class="pill ${map[p]||'pill-grey'}">${p}</span>`; }
@@ -1189,40 +1377,46 @@ async function duplicateWig(id){
    PEOPLE
    ========================================================================= */
 function populatePeopleFilters(){
+  document.getElementById("people-filter-category").innerHTML = `<option value="">All categories</option>` + selectOptions(STATE.peopleCategoryOptions);
   document.getElementById("people-filter-stage").innerHTML = `<option value="">All pipeline stages</option>` + selectOptions(PIPELINE_STAGES);
   document.getElementById("people-filter-district").innerHTML = `<option value="">All districts</option>` + STATE.districts.map(d=>`<option value="${d.id}">${d.name}</option>`).join("");
   document.getElementById("people-filter-province").innerHTML = `<option value="">All provinces</option>` + selectOptions(STATE.provinces.map(p=>p.name));
 }
 function renderPeople(){
   const q = (document.getElementById("people-search").value||"").toLowerCase();
+  const catF = document.getElementById("people-filter-category").value;
   const stageF = document.getElementById("people-filter-stage").value;
   const distF = document.getElementById("people-filter-district").value;
   const provF = document.getElementById("people-filter-province").value;
   const rows = STATE.people.filter(p=>{
+    if(catF && p.category!==catF) return false;
     if(stageF && p.stage!==stageF) return false;
     if(provF && p.province!==provF) return false;
     if(distF){ const d = districtOfProvince(p.province); if(!d || d.id!==distF) return false; }
-    if(q && !(p.name.toLowerCase().includes(q) || (p.role||"").toLowerCase().includes(q) || churchName(p.churchId).toLowerCase().includes(q))) return false;
+    if(q && !(p.name.toLowerCase().includes(q) || (p.role||"").toLowerCase().includes(q) || (p.partnerOrgName||"").toLowerCase().includes(q) || churchName(p.churchId).toLowerCase().includes(q))) return false;
     return true;
   });
   document.getElementById("people-count").textContent = rows.length + " of " + STATE.people.length;
   document.querySelector("#people-table tbody").innerHTML = rows.map(p=>`
     <tr onclick="openPersonForm('${p.id}')">
-      <td><strong>${p.name}</strong><div class="small">${p.role||""}</div></td>
+      <td><strong>${p.name}</strong><div class="small">${p.role||""}${p.partnerOrgName?" · "+p.partnerOrgName:""}</div></td>
+      <td>${pillForCategory(p.category)}</td>
       <td>${pillForStage(p.stage)}</td><td>${churchName(p.churchId)}</td><td>${p.province||"—"}</td><td class="small">${districtOfPerson(p)}</td>
       <td>${pillForFacStatus(p.facilitatorStatus)}</td><td class="mono small">${fmtDate(p.lastContact)}</td>
       <td class="mono small" style="${isOverdue(p.nextFollowUp)?'color:var(--rust);font-weight:700;':''}">${fmtDate(p.nextFollowUp)}</td>
-    </tr>`).join("") || `<tr><td colspan="8"><div class="empty">No people match these filters.</div></td></tr>`;
+    </tr>`).join("") || `<tr><td colspan="9"><div class="empty">No people match these filters.</div></td></tr>`;
 }
 function openPersonForm(id){
   const p = id ? STATE.people.find(x=>x.id===id) : null;
   const html = `<div class="modal-head"><h3>${p?"Edit Person":"Add Person"}</h3><button class="modal-close" onclick="closeModal()">&times;</button></div>
     <label class="field"><span class="lbl">Full Name</span><input id="f-name" value="${p?p.name:''}" placeholder="e.g. Ana Villaflor"></label>
     <div class="two-col">
+      <label class="field"><span class="lbl">Category</span><select id="f-category">${selectOptions(STATE.peopleCategoryOptions, p?p.category:STATE.peopleCategoryOptions[0])}</select></label>
       <label class="field"><span class="lbl">Ministry Role</span><input id="f-role" value="${p?p.role||'':''}" placeholder="e.g. Pastor, Facilitator"></label>
       <label class="field"><span class="lbl">Pipeline Stage</span><select id="f-stage">${selectOptions(PIPELINE_STAGES, p?p.stage:"Contact")}</select></label>
       <label class="field"><span class="lbl">Church</span><select id="f-church">${churchSelectOptions(p?p.churchId:"")}</select></label>
-      <label class="field"><span class="lbl">Province</span><select id="f-province">${provinceSelectOptions(p?p.province:"")}</select></label>
+      <label class="field"><span class="lbl">Province</span><select id="f-province">${provinceSelectOptions(p?p.province:"", "— not tied to a province —")}</select></label>
+      <label class="field"><span class="lbl">Partner / Organization Name</span><input id="f-partnerorg" value="${p?p.partnerOrgName||'':''}" placeholder="e.g. World Vision Philippines"></label>
       <label class="field"><span class="lbl">Facilitator Status</span><select id="f-facstatus">${selectOptions(FAC_STATUSES, p?p.facilitatorStatus:"")}</select></label>
       <label class="field"><span class="lbl">Status</span><select id="f-status">${selectOptions(PERSON_STATUSES, p?p.status:"Active")}</select></label>
       <label class="field"><span class="lbl">Contact Number</span><input id="f-phone" value="${p?p.phone||'':''}"></label>
@@ -1239,8 +1433,8 @@ async function savePerson(id){
   const val = (elId)=>document.getElementById(elId).value;
   const newStage = val("f-stage");
   let existing = id ? STATE.people.find(x=>x.id===id) : null;
-  const data = { name: val("f-name").trim() || "Unnamed", role: val("f-role"), stage: newStage, churchId: val("f-church")||null, province: val("f-province"),
-    facilitatorStatus: val("f-facstatus"), status: val("f-status"), phone: val("f-phone"), email: val("f-email"),
+  const data = { name: val("f-name").trim() || "Unnamed", category: val("f-category"), role: val("f-role"), stage: newStage, churchId: val("f-church")||null, province: val("f-province"),
+    partnerOrgName: val("f-partnerorg"), facilitatorStatus: val("f-facstatus"), status: val("f-status"), phone: val("f-phone"), email: val("f-email"),
     lastContact: val("f-lastcontact"), nextFollowUp: val("f-nextfollowup"), notes: val("f-notes") };
   if(existing){
     if(existing.stage !== newStage) STATE.pipelineLog.push({personId:existing.id, from:existing.stage, to:newStage, date:new Date().toISOString().slice(0,10), note:"Updated via People record."});
@@ -1325,6 +1519,18 @@ function renderOrg(){
 async function renameProvinceStatusOption(i, val){ STATE.provinceStatusOptions[i]=val.trim()||STATE.provinceStatusOptions[i]; await persist(); showToast("Updated."); }
 async function removeProvinceStatusOption(i){ STATE.provinceStatusOptions.splice(i,1); await persist(); renderOrg(); }
 async function addProvinceStatusOption(){ STATE.provinceStatusOptions.push("New Status"); await persist(); renderOrg(); }
+
+function renderPeopleCategoryOptions(){
+  const el = document.getElementById("people-category-options-list"); if(!el) return;
+  el.innerHTML = STATE.peopleCategoryOptions.map((s,i)=>`
+    <div style="display:flex;gap:6px;align-items:center;margin-bottom:6px;">
+      <input value="${s}" onchange="renamePeopleCategoryOption(${i}, this.value)" style="flex:1;">
+      <button class="btn btn-sm btn-danger" onclick="removePeopleCategoryOption(${i})">Remove</button>
+    </div>`).join("");
+}
+async function renamePeopleCategoryOption(i, val){ STATE.peopleCategoryOptions[i]=val.trim()||STATE.peopleCategoryOptions[i]; await persist(); showToast("Updated."); }
+async function removePeopleCategoryOption(i){ STATE.peopleCategoryOptions.splice(i,1); await persist(); renderPeopleCategoryOptions(); }
+async function addPeopleCategoryOption(){ STATE.peopleCategoryOptions.push("New Category"); await persist(); renderPeopleCategoryOptions(); }
 
 function openDistrictForm(id){
   const d = id ? districtById(id) : null;
@@ -1428,9 +1634,16 @@ function renderPipeline(){
    ========================================================================= */
 function populateDashSelectors(){
   const ds = document.getElementById("district-dash-select");
-  if(ds) ds.innerHTML = STATE.districts.map(d=>`<option value="${d.id}">${d.name} — ${d.leader}</option>`).join("");
+  if(ds){ const prev = ds.value; ds.innerHTML = STATE.districts.map(d=>`<option value="${d.id}">${d.name} — ${d.leader}</option>`).join(""); if(prev && STATE.districts.some(d=>d.id===prev)) ds.value = prev; }
   const ts = document.getElementById("team-dash-select");
-  if(ts) ts.innerHTML = STATE.teams.map(t=>`<option value="${t.id}">${t.name}</option>`).join("");
+  if(ts){ const prev = ts.value; ts.innerHTML = STATE.teams.map(t=>`<option value="${t.id}">${t.name}</option>`).join(""); if(prev && STATE.teams.some(t=>t.id===prev)) ts.value = prev; }
+  const ps = document.getElementById("province-dash-select");
+  if(ps){ const prev = ps.value; ps.innerHTML = STATE.provinces.map(p=>`<option value="${p.id}">${p.name}</option>`).join(""); if(prev && STATE.provinces.some(p=>p.id===prev)) ps.value = prev; }
+}
+function currentProvinceDashId(){
+  const ps = document.getElementById("province-dash-select");
+  if(ps && ps.value) return ps.value;
+  return STATE.provinces.length ? STATE.provinces[0].id : null;
 }
 function monthlyTrend(provinceNames){
   const fy = currentFY();
@@ -1513,6 +1726,292 @@ function renderTeamDashboard(){
   container.innerHTML = html;
 }
 function openWigFormForScope(scope, scopeId){ openWigForm(); setTimeout(()=>{ document.getElementById("f-wscope").value=scope; window.__wigEditScopeId=scopeId; onWigScopeChange(); document.getElementById("f-wscopeid").value=scopeId; },0); }
+
+/* =========================================================================
+   PROVINCIAL DASHBOARD — growth vs. editable baseline
+   ========================================================================= */
+function provinceGrowthStats(pr){
+  const curFac = STATE.people.filter(p=>p.province===pr.name && p.facilitatorStatus==="Active").length;
+  const curChurches = STATE.churches.filter(c=>c.province===pr.name).length;
+  const curPeople = STATE.people.filter(p=>p.province===pr.name).length;
+  const baseFac = pr.baselineActiveFacilitators ?? 0;
+  const baseChurches = pr.baselineChurches ?? 0;
+  const basePeople = pr.baselinePeople ?? 0;
+  const pct = (cur, base) => base>0 ? Math.round((cur-base)/base*100) : (cur>0 ? 100 : 0);
+  const facPct = pct(curFac, baseFac), churchPct = pct(curChurches, baseChurches), peoplePct = pct(curPeople, basePeople);
+  return { curFac, curChurches, curPeople, baseFac, baseChurches, basePeople, facPct, churchPct, peoplePct, growthTargetPct: pr.growthTargetPct||0 };
+}
+function growthBadge(pct){
+  const cls = pct>0 ? "growth-up" : pct<0 ? "growth-down" : "growth-flat";
+  const arrow = pct>0 ? "▲" : pct<0 ? "▼" : "▬";
+  return `<span class="growth-ind ${cls}">${arrow} ${pct>0?"+":""}${pct}%</span>`;
+}
+function renderProvinceDashboard(){
+  const sel = document.getElementById("province-dash-select"); if(!sel.value && STATE.provinces.length) sel.value = STATE.provinces[0].id;
+  const pr = STATE.provinces.find(p=>p.id===sel.value); const container = document.getElementById("province-dash-content");
+  if(!pr){ container.innerHTML = `<div class="empty">No provinces yet.</div>`; return; }
+  const g = provinceGrowthStats(pr);
+  const d = districtById(pr.districtId); const t = teamById(pr.teamId);
+  const s = computeScopeStats([pr.name]);
+  const fy = currentFY();
+  const trend = monthlyTrend([pr.name]);
+  const overallGrowth = Math.round((g.facPct + g.churchPct + g.peoplePct) / 3);
+  const targetGap = g.growthTargetPct - overallGrowth;
+  const targetStatus = overallGrowth >= g.growthTargetPct ? "On Track" : targetGap <= 10 ? "At Risk" : "Behind";
+
+  container.innerHTML = `
+    <div class="card" style="margin-bottom:14px;">
+      <div class="section-title">${pr.name} <span class="small">${d?d.name:"— no district —"} · ${t?t.name:"— no team —"} ${pr.coordinator?" · Coordinator: "+pr.coordinator:""}</span></div>
+      <div class="small">${pr.notes||"No notes yet."}</div>
+    </div>
+    <div class="grid grid-4" style="margin-bottom:14px;">
+      <div class="card stat"><div class="k">Active Facilitators</div><div class="v">${g.curFac}</div><div class="d">${growthBadge(g.facPct)} <span class="small">vs. baseline ${g.baseFac}</span></div></div>
+      <div class="card stat"><div class="k">Churches</div><div class="v">${g.curChurches}</div><div class="d">${growthBadge(g.churchPct)} <span class="small">vs. baseline ${g.baseChurches}</span></div></div>
+      <div class="card stat"><div class="k">Total People</div><div class="v">${g.curPeople}</div><div class="d">${growthBadge(g.peoplePct)} <span class="small">vs. baseline ${g.basePeople}</span></div></div>
+      <div class="card stat"><div class="k">Trainings This FY</div><div class="v">${s.trainingCt}</div><div class="d">${s.participants} participants</div></div>
+    </div>
+    <div class="card" style="margin-bottom:14px;">
+      <div class="section-title">Growth vs. Target ${pillForWigStatus(targetStatus)}</div>
+      <div class="small" style="margin-bottom:6px;">Average growth across facilitators, churches, and people, measured against this province's editable growth target.</div>
+      <div class="wig-bar-track" style="margin:6px 0;"><div class="wig-bar-fill" style="width:${Math.max(0,Math.min(100,overallGrowth))}%"></div></div>
+      <div class="small">${overallGrowth}% average growth achieved · ${g.growthTargetPct}% target · <a class="link" onclick="openProvinceGrowthForm('${pr.id}')">Edit baseline &amp; target →</a></div>
+    </div>
+    <div class="grid grid-2">
+      <div class="card"><div class="section-title">Trainings Conducted (${fy.label})</div>${renderMiniBarChart(trend,'trainings')}</div>
+      <div class="card"><div class="section-title">Follow-ups Completed (${fy.label})</div>${renderMiniBarChart(trend,'followups')}</div>
+    </div>`;
+
+  const overviewRows = STATE.provinces.map(p=>{
+    const gg = provinceGrowthStats(p);
+    const avg = Math.round((gg.facPct+gg.churchPct+gg.peoplePct)/3);
+    return {p, gg, avg};
+  }).sort((a,b)=>b.avg-a.avg);
+  document.getElementById("province-growth-overview").innerHTML = `<table><thead><tr><th>Province</th><th>Active Fac.</th><th>Churches</th><th>People</th><th>Avg. Growth</th><th>Target</th></tr></thead><tbody>
+    ${overviewRows.map(r=>`<tr onclick="document.getElementById('province-dash-select').value='${r.p.id}'; renderProvinceDashboard();">
+      <td><strong>${r.p.name}</strong></td>
+      <td>${r.gg.curFac} ${growthBadge(r.gg.facPct)}</td>
+      <td>${r.gg.curChurches} ${growthBadge(r.gg.churchPct)}</td>
+      <td>${r.gg.curPeople} ${growthBadge(r.gg.peoplePct)}</td>
+      <td>${growthBadge(r.avg)}</td>
+      <td class="small">${r.gg.growthTargetPct}%</td>
+    </tr>`).join("")}
+  </tbody></table>`;
+}
+function openProvinceGrowthForm(provinceId){
+  const pr = STATE.provinces.find(p=>p.id===provinceId);
+  if(!pr){ showToast("Select a province first."); return; }
+  const g = provinceGrowthStats(pr);
+  const html = `<div class="modal-head"><h3>Edit Growth Baseline — ${pr.name}</h3><button class="modal-close" onclick="closeModal()">&times;</button></div>
+    <div class="callout callout-teal" style="margin-bottom:14px;">↻ Reset the baseline to today's live numbers at the start of a fiscal year, then set a growth target for where you want this province by year-end.</div>
+    <div class="two-col">
+      <label class="field"><span class="lbl">Baseline Active Facilitators</span><input type="number" id="f-prg-fac" value="${pr.baselineActiveFacilitators}"></label>
+      <label class="field"><span class="lbl">Current (live)</span><input type="number" value="${g.curFac}" disabled style="background:#F4F1E9;"></label>
+      <label class="field"><span class="lbl">Baseline Churches</span><input type="number" id="f-prg-church" value="${pr.baselineChurches}"></label>
+      <label class="field"><span class="lbl">Current (live)</span><input type="number" value="${g.curChurches}" disabled style="background:#F4F1E9;"></label>
+      <label class="field"><span class="lbl">Baseline Total People</span><input type="number" id="f-prg-people" value="${pr.baselinePeople}"></label>
+      <label class="field"><span class="lbl">Current (live)</span><input type="number" value="${g.curPeople}" disabled style="background:#F4F1E9;"></label>
+      <label class="field" style="grid-column:1/-1;"><span class="lbl">Growth Target (%) for this fiscal year</span><input type="number" id="f-prg-target" value="${pr.growthTargetPct}"></label>
+    </div>
+    <div class="modal-foot">
+      <span><button class="btn btn-sm" onclick="resetProvinceBaselineToCurrent('${pr.id}')">Reset baseline to current</button></span>
+      <span style="display:flex;gap:8px;"><button class="btn" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="saveProvinceGrowth('${pr.id}')">Save</button></span>
+    </div>`;
+  openModal(html);
+}
+async function saveProvinceGrowth(provinceId){
+  const pr = STATE.provinces.find(p=>p.id===provinceId);
+  const val=(x)=>document.getElementById(x).value;
+  pr.baselineActiveFacilitators = parseFloat(val("f-prg-fac"))||0;
+  pr.baselineChurches = parseFloat(val("f-prg-church"))||0;
+  pr.baselinePeople = parseFloat(val("f-prg-people"))||0;
+  pr.growthTargetPct = parseFloat(val("f-prg-target"))||0;
+  await persist(); closeModal(); showToast("Growth baseline saved."); renderAll();
+}
+async function resetProvinceBaselineToCurrent(provinceId){
+  const pr = STATE.provinces.find(p=>p.id===provinceId);
+  const g = provinceGrowthStats(pr);
+  pr.baselineActiveFacilitators = g.curFac; pr.baselineChurches = g.curChurches; pr.baselinePeople = g.curPeople;
+  await persist(); closeModal(); showToast("Baseline reset to today's numbers."); renderAll();
+}
+
+/* =========================================================================
+   PROVINCE GROWTH INDICATORS — ECC PH 9-Indicator Ministry Maturity Framework
+   ========================================================================= */
+function growthDef(indicatorId){ return STATE.growthIndicatorDefs.find(d=>d.id===indicatorId); }
+function growthLevelDef(indicatorId, level){ const d = growthDef(indicatorId); return d ? d.levels.find(l=>l.level===level) : null; }
+function growthAssessmentFor(provinceId, indicatorId){
+  let a = STATE.growthAssessments.find(x=>x.provinceId===provinceId && x.indicatorId===indicatorId);
+  if(!a){ a = {id:uid("ga"), provinceId, indicatorId, level:1, notes:"", lastAssessed:""}; STATE.growthAssessments.push(a); }
+  return a;
+}
+function provinceMaturityAvg(provinceId){
+  const vals = STATE.growthIndicatorDefs.map(def=>growthAssessmentFor(provinceId, def.id).level);
+  return vals.reduce((s,v)=>s+v,0) / (vals.length||1);
+}
+function indicatorNationalAvg(indicatorId){
+  const vals = STATE.provinces.map(pr=>growthAssessmentFor(pr.id, indicatorId).level);
+  return vals.reduce((s,v)=>s+v,0) / (vals.length||1);
+}
+function levelColor(level){ return {1:"#726B5C",2:"#B4832A",3:"#2F6F62",4:"#2F5A8A",5:"#172033"}[Math.round(level)] || "#726B5C"; }
+function levelPillClass(level){ return {1:"pill-grey",2:"pill-gold",3:"pill-teal",4:"pill-blue",5:"pill-deep"}[Math.round(level)] || "pill-grey"; }
+function levelMeter(level){
+  let html = `<div class="level-meter">`;
+  for(let i=1;i<=5;i++){ const filled = i<=Math.round(level); html += `<div class="seg" style="${filled?`background:${levelColor(level)};`:''}"></div>`; }
+  return html + `</div>`;
+}
+function populateGrowthProvinceSelect(){
+  const sel = document.getElementById("growth-province-select"); if(!sel) return;
+  const prev = sel.value;
+  sel.innerHTML = STATE.provinces.map(p=>`<option value="${p.id}">${p.name}</option>`).join("");
+  if(prev && STATE.provinces.some(p=>p.id===prev)) sel.value = prev;
+}
+function renderGrowthAssessment(){
+  const sel = document.getElementById("growth-province-select"); if(!sel.value && STATE.provinces.length) sel.value = STATE.provinces[0].id;
+  const pr = STATE.provinces.find(p=>p.id===sel.value); const container = document.getElementById("growth-assess-content");
+  if(!pr){ container.innerHTML = `<div class="empty">No provinces yet.</div>`; return; }
+  const avg = provinceMaturityAvg(pr.id);
+  const d = districtById(pr.districtId); const t = teamById(pr.teamId);
+  let html = `<div class="card" style="margin-bottom:14px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+      <div><div class="section-title" style="margin-bottom:2px;">${pr.name} <span class="small">${d?d.name:"— no district —"} · ${t?t.name:"— no team —"}</span></div><div class="small">Overall ministry maturity — average across all 9 indicators.</div></div>
+      <div style="text-align:right;"><div style="font-family:'Fraunces',serif;font-size:28px;font-weight:600;">${avg.toFixed(1)} <span class="small" style="font-family:'Inter';">/ 5</span></div>${levelMeter(avg)}</div>
+    </div>
+  </div>
+  <div class="card"><div class="section-title">Indicator Scores</div><div class="table-wrap"><table><thead><tr><th>Indicator</th><th>Level</th><th>Growth Stage</th><th>Meter</th><th>Last Assessed</th><th></th></tr></thead><tbody>`;
+  STATE.growthIndicatorDefs.forEach(def=>{
+    const a = growthAssessmentFor(pr.id, def.id);
+    const lvlDef = growthLevelDef(def.id, a.level);
+    html += `<tr onclick="openGrowthAssessmentForm('${pr.id}','${def.id}')">
+      <td><strong>${def.name}</strong></td>
+      <td><span class="pill ${levelPillClass(a.level)}">Level ${a.level}</span></td>
+      <td class="small">${lvlDef?lvlDef.stage:"—"}</td>
+      <td>${levelMeter(a.level)}</td>
+      <td class="mono small">${a.lastAssessed?fmtDate(a.lastAssessed):"—"}</td>
+      <td><button class="btn btn-sm" onclick="event.stopPropagation(); openGrowthAssessmentForm('${pr.id}','${def.id}')">Assess</button></td>
+    </tr>`;
+  });
+  html += `</tbody></table></div></div>`;
+  container.innerHTML = html;
+}
+function openGrowthAssessmentForm(provinceId, indicatorId){
+  const pr = STATE.provinces.find(p=>p.id===provinceId); const def = growthDef(indicatorId);
+  const a = growthAssessmentFor(provinceId, indicatorId);
+  const rubricHtml = def.levels.map(l=>`
+    <div style="padding:8px 0;border-bottom:1px solid #EFEBDF;">
+      <div style="display:flex;gap:8px;align-items:baseline;"><span class="pill ${levelPillClass(l.level)}">Level ${l.level}</span><strong style="font-size:12.5px;">${l.stage}</strong></div>
+      <div class="small" style="margin:4px 0 3px;">${l.qualitative}</div>
+      <div class="small">${l.quantitative.map(q=>"• "+q).join("<br>")}</div>
+    </div>`).join("");
+  const html = `<div class="modal-head"><h3>Assess — ${def.name}</h3><button class="modal-close" onclick="closeModal()">&times;</button></div>
+    <div class="small" style="margin-bottom:10px;"><strong>${pr.name}</strong> · ${def.description}</div>
+    <div class="two-col">
+      <label class="field"><span class="lbl">Level (1–5)</span><select id="f-galevel">${[1,2,3,4,5].map(n=>`<option value="${n}" ${n===a.level?"selected":""}>Level ${n} — ${def.levels.find(l=>l.level===n).stage}</option>`).join("")}</select></label>
+      <label class="field"><span class="lbl">Last Assessed</span><input type="date" id="f-gadate" value="${a.lastAssessed||new Date().toISOString().slice(0,10)}"></label>
+    </div>
+    <label class="field"><span class="lbl">Notes</span><textarea id="f-ganotes">${a.notes||''}</textarea></label>
+    <hr class="rule">
+    <div class="section-title" style="margin-bottom:4px;">Full Rubric — all 5 levels</div>
+    ${rubricHtml}
+    <div class="modal-foot"><span></span>
+      <span style="display:flex;gap:8px;"><button class="btn" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="saveGrowthAssessment('${provinceId}','${indicatorId}')">Save Assessment</button></span></div>`;
+  openModal(html);
+}
+async function saveGrowthAssessment(provinceId, indicatorId){
+  const a = growthAssessmentFor(provinceId, indicatorId);
+  a.level = parseInt(document.getElementById("f-galevel").value)||1;
+  a.lastAssessed = document.getElementById("f-gadate").value;
+  a.notes = document.getElementById("f-ganotes").value;
+  await persist(); closeModal(); showToast("Assessment saved."); renderAll();
+}
+function renderGrowthMatrix(){
+  const container = document.getElementById("growth-matrix-content"); if(!container) return;
+  let html = `<div class="card" style="margin-bottom:16px;"><div class="section-title">National Average by Indicator <span class="small">Where the whole movement is strongest / weakest, right now</span></div>`;
+  STATE.growthIndicatorDefs.forEach(def=>{
+    const avg = indicatorNationalAvg(def.id);
+    html += `<div style="margin-bottom:10px;">
+      <div style="display:flex;justify-content:space-between;font-size:12.5px;font-weight:700;"><span>${def.name}</span><span class="mono">${avg.toFixed(1)} / 5</span></div>
+      ${levelMeter(avg)}
+    </div>`;
+  });
+  html += `</div>`;
+
+  STATE.districts.forEach(d=>{
+    const provs = provincesOfDistrict(d.id);
+    if(!provs.length) return;
+    html += `<div class="card" style="margin-bottom:16px;"><div class="section-title">${d.name} — ${d.leader}</div><div class="table-wrap"><table><thead><tr><th style="text-align:left;">Indicator</th>${provs.map(p=>`<th>${p.name}</th>`).join("")}<th>Avg</th></tr></thead><tbody>`;
+    STATE.growthIndicatorDefs.forEach(def=>{
+      const rowVals = provs.map(p=>growthAssessmentFor(p.id, def.id).level);
+      const rowAvg = rowVals.reduce((s,v)=>s+v,0)/(rowVals.length||1);
+      html += `<tr><td style="text-align:left;"><strong>${def.name}</strong></td>${provs.map(p=>{ const a = growthAssessmentFor(p.id, def.id); return `<td style="cursor:pointer;" onclick="jumpToGrowthAssessment('${p.id}','${def.id}')"><span class="pill ${levelPillClass(a.level)}">${a.level}</span></td>`; }).join("")}<td class="mono small">${rowAvg.toFixed(1)}</td></tr>`;
+    });
+    html += `<tr><td style="text-align:left;"><strong>Overall Maturity</strong></td>${provs.map(p=>`<td class="mono small">${provinceMaturityAvg(p.id).toFixed(1)}</td>`).join("")}<td></td></tr>`;
+    html += `</tbody></table></div></div>`;
+  });
+  container.innerHTML = html;
+}
+function jumpToGrowthAssessment(provinceId, indicatorId){
+  document.querySelector('.tab[data-tab="growth"][data-sub="growth-assess"]').dispatchEvent(new Event("click", {bubbles:true}));
+  const sel = document.getElementById("growth-province-select"); sel.value = provinceId; renderGrowthAssessment();
+  setTimeout(()=>openGrowthAssessmentForm(provinceId, indicatorId), 0);
+}
+function renderGrowthFramework(){
+  const container = document.getElementById("growth-framework-content"); if(!container) return;
+  container.innerHTML = `<div class="callout callout-gold" style="margin-bottom:14px;">📖 <div><strong>ECC PH Province Growth Indicators Framework — Version 1</strong><br>An assessment tool that measures the current level of ECC PH ministry presence and maturity within a province. It helps provincial leaders identify strengths, gaps, and next steps toward a healthy, multiplying, sustainable Kingdom movement. Each indicator is evaluated using five levels of growth, from Emerging (Level 1) to Movement (Level 5). Fully editable — rename indicators, rewrite level descriptions, or add new indicators as the framework evolves.</div></div>
+    <div class="pagehead" style="margin-bottom:10px;"><div></div><div class="actions"><button class="btn btn-sm btn-primary" onclick="openIndicatorDefForm()">+ Add Indicator</button></div></div>
+    ${STATE.growthIndicatorDefs.map(def=>`
+      <div class="card" style="margin-bottom:12px;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;">
+          <div><div class="section-title" style="margin-bottom:2px;">${def.name}</div><div class="small" style="margin-bottom:10px;">${def.description}</div></div>
+          <button class="btn btn-sm" onclick="openIndicatorDefForm('${def.id}')">Edit</button>
+        </div>
+        <div class="table-wrap"><table><thead><tr><th>Level</th><th>Growth Stage</th><th>Qualitative Description</th><th>Quantitative Indicators</th></tr></thead><tbody>
+          ${def.levels.map(l=>`<tr><td><span class="pill ${levelPillClass(l.level)}">Level ${l.level}</span></td><td><strong>${l.stage}</strong></td><td class="small">${l.qualitative}</td><td class="small">${l.quantitative.map(q=>"• "+q).join("<br>")}</td></tr>`).join("")}
+        </tbody></table></div>
+      </div>`).join("")}`;
+}
+function openIndicatorDefForm(id){
+  const def = id ? growthDef(id) : null;
+  const levels = def ? def.levels : [1,2,3,4,5].map(n=>({level:n, stage:"", qualitative:"", quantitative:[]}));
+  const html = `<div class="modal-head"><h3>${def?"Edit Indicator":"Add Indicator"}</h3><button class="modal-close" onclick="closeModal()">&times;</button></div>
+    <label class="field"><span class="lbl">Indicator Name</span><input id="f-giname" value="${def?def.name:''}" placeholder="e.g. Leader Development"></label>
+    <label class="field"><span class="lbl">Description</span><textarea id="f-gidesc">${def?def.description:''}</textarea></label>
+    <hr class="rule">
+    <div class="section-title" style="margin-bottom:8px;">Levels 1–5</div>
+    ${levels.map((l,i)=>`
+      <div class="card" style="margin-bottom:8px;padding:12px 14px;">
+        <div style="font-weight:700;font-size:12px;margin-bottom:6px;">Level ${l.level}</div>
+        <label class="field"><span class="lbl">Growth Stage Name</span><input id="f-gi-stage-${i}" value="${l.stage||''}" placeholder="e.g. Emerging Leaders"></label>
+        <label class="field"><span class="lbl">Qualitative Description</span><textarea id="f-gi-qual-${i}">${l.qualitative||''}</textarea></label>
+        <label class="field"><span class="lbl">Quantitative Indicators (one per line)</span><textarea id="f-gi-quant-${i}">${(l.quantitative||[]).join("\n")}</textarea></label>
+      </div>`).join("")}
+    <div class="modal-foot">
+      <span>${def?`<button class="btn btn-danger" onclick="deleteIndicatorDef('${def.id}')">Delete Indicator</button>`:''}</span>
+      <span style="display:flex;gap:8px;"><button class="btn" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="saveIndicatorDef(${def?`'${def.id}'`:'null'})">Save</button></span>
+    </div>`;
+  openModal(html);
+}
+async function saveIndicatorDef(id){
+  const val=(x)=>document.getElementById(x).value;
+  const levels = [0,1,2,3,4].map(i=>({
+    level: i+1,
+    stage: val(`f-gi-stage-${i}`),
+    qualitative: val(`f-gi-qual-${i}`),
+    quantitative: val(`f-gi-quant-${i}`).split("\n").map(s=>s.trim()).filter(Boolean),
+  }));
+  const data = { name: document.getElementById("f-giname").value.trim()||"Untitled Indicator", description: document.getElementById("f-gidesc").value, levels };
+  if(id){ Object.assign(growthDef(id), data); }
+  else{
+    const newDef = {id: uid("gi"), ...data};
+    STATE.growthIndicatorDefs.push(newDef);
+    STATE.provinces.forEach(pr=>{ growthAssessmentFor(pr.id, newDef.id); });
+  }
+  await persist(); closeModal(); showToast("Indicator saved."); renderAll();
+}
+async function deleteIndicatorDef(id){
+  STATE.growthIndicatorDefs = STATE.growthIndicatorDefs.filter(d=>d.id!==id);
+  STATE.growthAssessments = STATE.growthAssessments.filter(a=>a.indicatorId!==id);
+  await persist(); closeModal(); showToast("Indicator deleted."); renderAll();
+}
 
 /* =========================================================================
    LMS — COURSES + PATHWAYS + LEARNERS + ASSESSMENTS + CERTIFICATIONS
@@ -2000,12 +2499,14 @@ function renderAll(){
   populateChurchFilters(); renderChurches();
   renderOrg();
   renderPipeline();
-  renderDistrictDashboard(); renderTeamDashboard();
+  renderDistrictDashboard(); renderTeamDashboard(); renderProvinceDashboard();
+  populateGrowthProvinceSelect(); renderGrowthAssessment(); renderGrowthMatrix(); renderGrowthFramework();
   renderLmsProgress(); renderModules(); renderPathways(); renderLearners(); renderAssessments(); renderCerts(); renderReadiness();
   populateEventFilters(); renderEvents();
   populateActivityFilters(); renderActivities(); renderStories();
   renderTemplates(); renderMonthlyStatusGrid(); reportsBody();
   renderAdmin();
+  renderPeopleCategoryOptions();
 }
 
 (async function init(){
