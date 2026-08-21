@@ -88,6 +88,14 @@ tbody tr{cursor:pointer;transition:background .1s;} tbody tr:hover{background:#F
 .pill-deep{background:var(--ink);color:#F5EFDD;}
 .level-meter{display:flex;gap:3px;}
 .level-meter .seg{width:16px;height:8px;border-radius:3px;background:#ECE7D8;}
+.gen-tree, .gen-tree ul{list-style:none;margin:0;padding-left:22px;}
+.gen-tree{padding-left:0;}
+.gen-tree li{position:relative;padding:6px 0 6px 18px;border-left:1.5px solid var(--border);}
+.gen-tree li:last-child{border-left:1.5px solid transparent;}
+.gen-tree li::before{content:"";position:absolute;left:0;top:20px;width:14px;height:1.5px;background:var(--border);}
+.gen-node{display:inline-flex;align-items:center;gap:8px;padding:6px 11px;border:1px solid var(--border);border-radius:9px;background:#fff;cursor:pointer;font-size:12.3px;box-shadow:var(--shadow);transition:border-color .12s;}
+.gen-node:hover{border-color:var(--gold);}
+.gen-node .nm{font-weight:700;}
 
 .tabs{display:flex;gap:4px;margin-bottom:16px;border-bottom:1px solid var(--border);flex-wrap:wrap;}
 .tab{padding:8px 13px;font-size:12.5px;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;}
@@ -181,6 +189,11 @@ textarea{min-height:70px;resize:vertical;}
     <div class="navitem" data-view="churches"><span class="ic">&#9962;</span> Churches</div>
     <div class="navitem" data-view="org"><span class="ic">&#128506;</span> Districts, Provinces &amp; Teams</div>
     <div class="navitem" data-view="pipeline"><span class="ic">&#8599;</span> Discipleship Pipeline</div>
+  </div>
+
+  <div class="navgroup">
+    <div class="navgroup-label">Leader Development</div>
+    <div class="navitem" data-view="genealogy"><span class="ic">&#127795;</span> Coaching Genealogy &amp; LDGs</div>
   </div>
 
   <div class="navgroup">
@@ -356,6 +369,27 @@ textarea{min-height:70px;resize:vertical;}
     </div>
     <div class="card" style="margin-bottom:16px;"><div class="section-title">Stage Distribution</div><div class="kanban" id="pipeline-board"></div></div>
     <div class="card"><div class="section-title">Stage-Change History</div><div class="table-wrap"><table><thead><tr><th>Date</th><th>Person</th><th>From</th><th>To</th><th>Note</th></tr></thead><tbody id="pipeline-log-body"></tbody></table></div></div>
+  </section>
+
+  <!-- ============ COACHING GENEALOGY & LEADER DEVELOPMENT GROUPS ============ -->
+  <section class="view" id="view-genealogy">
+    <div class="pagehead">
+      <div><h1>Coaching Genealogy &amp; Leader Development</h1><div class="desc">Who is coaching whom, tracked across spiritual generations — plus the Leadership Development Groups (LDGs) driving it. Every relationship here is editable.</div></div>
+    </div>
+    <div class="tabs">
+      <div class="tab active" data-tab="genealogy" data-sub="gen-tree">Genealogy Tree</div>
+      <div class="tab" data-tab="genealogy" data-sub="gen-ldgs">Leader Development Groups</div>
+    </div>
+    <div class="subview active" id="gen-tree">
+      <div class="grid grid-4" id="genealogy-stats" style="margin-bottom:16px;"></div>
+      <div class="card"><div class="section-title">Coaching Tree <span class="small">Click anyone to edit them or reassign their coach</span></div>
+        <div id="genealogy-tree-content"></div>
+      </div>
+    </div>
+    <div class="subview" id="gen-ldgs">
+      <div class="pagehead" style="margin-bottom:10px;"><div></div><div class="actions"><button class="btn btn-sm btn-primary" onclick="openLdgForm()">+ Add LDG</button></div></div>
+      <div class="grid grid-3" id="ldg-grid"></div>
+    </div>
   </section>
 
   <!-- ============ DISTRICT & TEAM & PROVINCIAL DASHBOARDS ============ -->
@@ -672,6 +706,25 @@ function seedData(){
     {id:"p19", name:"World Vision Philippines", role:"Partner Organization Liaison", stage:"Contact", churchId:null, province:"", facilitatorStatus:"", category:"Partner Organization", partnerOrgName:"World Vision Philippines", phone:"", email:"partnerships@worldvision.org.ph", status:"Active", lastContact:"2026-07-01", nextFollowUp:"2026-09-01", notes:"National partner supporting community development initiatives alongside ECC PH."},
   ];
 
+  // Coaching relationships (who coaches whom) — seeds a multi-generational genealogy for the demo
+  const COACH_BY_NAME = {
+    "Karl Domingo":"Emil Gonzales", "Ligaya Reyes":"Emil Gonzales", "Grace Lim":"Emil Gonzales",
+    "Ramil Ortega":"Emil Gonzales", "Jun Mercado":"Emil Gonzales",
+    "Danilo Cruz":"Karl Domingo", "Ella Reyes":"Karl Domingo",
+    "Rowena Fabros":"Danilo Cruz",
+    "Cristy Navarro":"Grace Lim",
+    "Bong Pascual":"Ramil Ortega",
+    "Melissa Tan":"Jun Mercado", "Edgar Villamor":"Jun Mercado",
+  };
+  const nameToId = {}; people.forEach(p=>{ nameToId[p.name]=p.id; });
+  people.forEach(p=>{ const coachName = COACH_BY_NAME[p.name]; p.coachId = coachName ? (nameToId[coachName]||null) : null; });
+
+  const ldgs = [
+    {id:"ldg1", name:"Emil's National LDG", coachId:"p1", memberIds:["p2","p9","p3","p4","p6"], schedule:"Monthly, 1st Saturday", goals:"Develop district-level multiplying leaders across all five districts.", notes:"", status:"Active"},
+    {id:"ldg2", name:"Karl's Pangasinan-Tarlac LDG", coachId:"p2", memberIds:["p10","p17"], schedule:"Bi-weekly, Tuesdays", goals:"Deploy two new facilitators from the Pangasinan/Tarlac cluster this fiscal year.", notes:"", status:"Active"},
+    {id:"ldg3", name:"Jun's Palawan LDG", coachId:"p6", memberIds:["p15","p14"], schedule:"Weekly, Thursdays", goals:"Move Edgar and Melissa toward IAL certification.", notes:"", status:"Active"},
+  ];
+
   const modules = [
     {id:"m1", name:"DMJ Module 1", code:"DMJ-1", category:"Discipleship", level:"Foundational", description:"Foundations of the discipleship journey.", objectives:"Understand the discipleship journey framework.", facilitatorId:"p2", duration:"1 day", materials:"Workbook, slides", certificateRequired:false, status:"Active", targetAudience:"New believers, participants"},
     {id:"m2", name:"DMJ Module 2", code:"DMJ-2", category:"Discipleship", level:"Foundational", description:"Growing in relationship and community.", objectives:"Build discipleship community habits.", facilitatorId:"p2", duration:"1 day", materials:"Workbook", certificateRequired:false, status:"Active", targetAudience:"Learners"},
@@ -896,7 +949,7 @@ function seedData(){
     });
   });
 
-  return {fiscalYears, districts, teams, provinces, provinceStatusOptions, peopleCategoryOptions, churches, people, modules, pathways, events, completions, assessments, certifications, activities, pipelineLog, wigs, reportTemplates, reports, stories, growthIndicatorDefs, growthAssessments};
+  return {fiscalYears, districts, teams, provinces, provinceStatusOptions, peopleCategoryOptions, churches, people, modules, pathways, events, completions, assessments, certifications, activities, pipelineLog, wigs, reportTemplates, reports, stories, growthIndicatorDefs, growthAssessments, ldgs};
 }
 
 /* =========================================================================
@@ -916,6 +969,7 @@ function migrateState(){
   if(!STATE.provinces || !STATE.provinces.length) STATE.provinces = seed.provinces;
   if(!STATE.provinceStatusOptions) STATE.provinceStatusOptions = seed.provinceStatusOptions;
   if(!STATE.peopleCategoryOptions || !STATE.peopleCategoryOptions.length) STATE.peopleCategoryOptions = seed.peopleCategoryOptions;
+  if(!STATE.ldgs) STATE.ldgs = [];
   if(!STATE.wigs) STATE.wigs = seed.wigs;
   if(!STATE.reportTemplates || !STATE.reportTemplates.length) STATE.reportTemplates = seed.reportTemplates;
   if(!STATE.reports) STATE.reports = [];
@@ -947,6 +1001,7 @@ function migrateState(){
     if(p.facilitatorStatus===undefined) p.facilitatorStatus="";
     if(p.category===undefined) p.category="Worker";
     if(p.partnerOrgName===undefined) p.partnerOrgName="";
+    if(p.coachId===undefined) p.coachId=null;
   });
   STATE.events.forEach(e=>{ if(e.qaStage===undefined) e.qaStage="Participant Form"; if(e.feedback===undefined) e.feedback=""; if(e.debrief===undefined) e.debrief=""; if(e.actionPlan===undefined) e.actionPlan=""; });
   STATE.activities.forEach(a=>{ if(a.followUpStage===undefined) a.followUpStage=""; });
@@ -1417,6 +1472,7 @@ function openPersonForm(id){
       <label class="field"><span class="lbl">Church</span><select id="f-church">${churchSelectOptions(p?p.churchId:"")}</select></label>
       <label class="field"><span class="lbl">Province</span><select id="f-province">${provinceSelectOptions(p?p.province:"", "— not tied to a province —")}</select></label>
       <label class="field"><span class="lbl">Partner / Organization Name</span><input id="f-partnerorg" value="${p?p.partnerOrgName||'':''}" placeholder="e.g. World Vision Philippines"></label>
+      <label class="field"><span class="lbl">Coached By</span><select id="f-coach">${coachSelectOptions(p?p.id:null, p?p.coachId:"")}</select></label>
       <label class="field"><span class="lbl">Facilitator Status</span><select id="f-facstatus">${selectOptions(FAC_STATUSES, p?p.facilitatorStatus:"")}</select></label>
       <label class="field"><span class="lbl">Status</span><select id="f-status">${selectOptions(PERSON_STATUSES, p?p.status:"Active")}</select></label>
       <label class="field"><span class="lbl">Contact Number</span><input id="f-phone" value="${p?p.phone||'':''}"></label>
@@ -1434,7 +1490,7 @@ async function savePerson(id){
   const newStage = val("f-stage");
   let existing = id ? STATE.people.find(x=>x.id===id) : null;
   const data = { name: val("f-name").trim() || "Unnamed", category: val("f-category"), role: val("f-role"), stage: newStage, churchId: val("f-church")||null, province: val("f-province"),
-    partnerOrgName: val("f-partnerorg"), facilitatorStatus: val("f-facstatus"), status: val("f-status"), phone: val("f-phone"), email: val("f-email"),
+    partnerOrgName: val("f-partnerorg"), coachId: val("f-coach")||null, facilitatorStatus: val("f-facstatus"), status: val("f-status"), phone: val("f-phone"), email: val("f-email"),
     lastContact: val("f-lastcontact"), nextFollowUp: val("f-nextfollowup"), notes: val("f-notes") };
   if(existing){
     if(existing.stage !== newStage) STATE.pipelineLog.push({personId:existing.id, from:existing.stage, to:newStage, date:new Date().toISOString().slice(0,10), note:"Updated via People record."});
@@ -1442,7 +1498,7 @@ async function savePerson(id){
   } else STATE.people.push({id: uid("p"), ...data});
   await persist(); closeModal(); showToast("Person saved."); renderAll();
 }
-async function deletePerson(id){ STATE.people = STATE.people.filter(p=>p.id!==id); await persist(); closeModal(); showToast("Person deleted."); renderAll(); }
+async function deletePerson(id){ STATE.people = STATE.people.filter(p=>p.id!==id); STATE.people.forEach(p=>{ if(p.coachId===id) p.coachId=null; }); await persist(); closeModal(); showToast("Person deleted."); renderAll(); }
 
 /* =========================================================================
    CHURCHES
@@ -1628,6 +1684,93 @@ function renderPipeline(){
   const log = [...STATE.pipelineLog].sort((a,b)=>new Date(b.date)-new Date(a.date));
   document.getElementById("pipeline-log-body").innerHTML = log.map(l=>`<tr><td class="mono small">${fmtDate(l.date)}</td><td>${personName(l.personId)}</td><td>${pillForStage(l.from)}</td><td>${pillForStage(l.to)}</td><td class="small">${l.note||""}</td></tr>`).join("") || `<tr><td colspan="5"><div class="empty">No stage changes logged yet.</div></td></tr>`;
 }
+
+/* =========================================================================
+   COACHING GENEALOGY + LEADER DEVELOPMENT GROUPS (LDGs)
+   ========================================================================= */
+function coacheesOf(personId){ return STATE.people.filter(p=>p.coachId===personId); }
+function descendantIds(personId){
+  const result = [];
+  function walk(pid){ coacheesOf(pid).forEach(k=>{ result.push(k.id); walk(k.id); }); }
+  walk(personId);
+  return result;
+}
+function coachSelectOptions(currentPersonId, selectedCoachId){
+  const excluded = new Set(currentPersonId ? [currentPersonId, ...descendantIds(currentPersonId)] : []);
+  let html = `<option value="">— no coach / top-level —</option>`;
+  STATE.people.forEach(p=>{ if(!excluded.has(p.id)) html += `<option value="${p.id}" ${p.id===selectedCoachId?"selected":""}>${p.name}</option>`; });
+  return html;
+}
+function genealogyRoots(){
+  return STATE.people.filter(p=> !p.coachId || !STATE.people.some(x=>x.id===p.coachId));
+}
+function renderGenealogyNode(person, depth){
+  const kids = coacheesOf(person.id);
+  let html = `<li><div class="gen-node" onclick="openPersonForm('${person.id}')">
+    <span class="pill pill-grey" style="font-size:9.5px;">Gen ${depth+1}</span>
+    <span class="nm">${person.name}</span>
+    <span class="small">${person.role||""}</span>
+    ${kids.length?`<span class="small">· coaching ${kids.length}</span>`:''}
+  </div>`;
+  if(kids.length) html += `<ul>${kids.map(k=>renderGenealogyNode(k, depth+1)).join("")}</ul>`;
+  html += `</li>`;
+  return html;
+}
+function renderGenealogyTree(){
+  const roots = genealogyRoots();
+  const container = document.getElementById("genealogy-tree-content");
+  if(container) container.innerHTML = roots.length ? `<ul class="gen-tree">${roots.map(r=>renderGenealogyNode(r,0)).join("")}</ul>` : `<div class="empty">No people yet.</div>`;
+
+  const totalRelationships = STATE.people.filter(p=>p.coachId).length;
+  const uncoached = STATE.people.filter(p=>!p.coachId).length;
+  let maxDepth = 1;
+  function walk(p, d){ maxDepth = Math.max(maxDepth, d); coacheesOf(p.id).forEach(k=>walk(k, d+1)); }
+  roots.forEach(r=>walk(r,1));
+  const topCoaches = STATE.people.map(p=>({p, ct: coacheesOf(p.id).length})).filter(x=>x.ct>0).sort((a,b)=>b.ct-a.ct);
+  const statsEl = document.getElementById("genealogy-stats");
+  if(statsEl) statsEl.innerHTML = [
+    {k:"Coaching Relationships", v: totalRelationships},
+    {k:"Not Yet Assigned a Coach", v: uncoached},
+    {k:"Deepest Generation Reached", v: maxDepth},
+    {k:"Top Coach", v: topCoaches[0]? topCoaches[0].p.name : "—", d: topCoaches[0]? topCoaches[0].ct+" people coached":""},
+  ].map(s=>`<div class="card stat"><div class="k">${s.k}</div><div class="v" style="${(''+s.v).length>12?'font-size:16px;':''}">${s.v}</div>${s.d?`<div class="d">${s.d}</div>`:''}</div>`).join("");
+}
+function renderLdgs(){
+  const el = document.getElementById("ldg-grid"); if(!el) return;
+  el.innerHTML = STATE.ldgs.map(g=>`
+    <div class="card" style="cursor:pointer;" onclick="openLdgForm('${g.id}')">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;"><strong style="font-size:13.5px;">${g.name}</strong>${pillForOrgStatus(g.status)}</div>
+      <div class="small" style="margin:8px 0 2px;"><strong>Coach:</strong> ${personName(g.coachId)}</div>
+      <div class="small" style="margin-bottom:8px;">${g.schedule||"No schedule set"}</div>
+      <div class="small" style="margin-bottom:8px;">${g.goals||""}</div>
+      <div class="small"><strong>${(g.memberIds||[]).length}</strong> members</div>
+    </div>`).join("") || `<div class="empty" style="grid-column:1/-1;">No Leadership Development Groups yet.</div>`;
+}
+function openLdgForm(id){
+  const g = id ? STATE.ldgs.find(x=>x.id===id) : null;
+  const memberChecklist = STATE.people.map(p=>`<label style="display:flex;align-items:center;gap:6px;font-size:12px;padding:2px 0;"><input type="checkbox" value="${p.id}" class="ldg-member-cb" style="width:auto;" ${g&&(g.memberIds||[]).includes(p.id)?"checked":""}> ${p.name}</label>`).join("");
+  const html = `<div class="modal-head"><h3>${g?"Edit LDG":"Add Leadership Development Group"}</h3><button class="modal-close" onclick="closeModal()">&times;</button></div>
+    <label class="field"><span class="lbl">Group Name</span><input id="f-ldgname" value="${g?g.name:''}" placeholder="e.g. Emil's National LDG"></label>
+    <div class="two-col">
+      <label class="field"><span class="lbl">Coach / Leader</span><select id="f-ldgcoach">${personSelectOptions(g?g.coachId:"")}</select></label>
+      <label class="field"><span class="lbl">Status</span><select id="f-ldgstatus">${selectOptions(ORG_STATUSES, g?g.status:"Active")}</select></label>
+      <label class="field" style="grid-column:1/-1;"><span class="lbl">Meeting Schedule</span><input id="f-ldgschedule" value="${g?g.schedule||'':''}" placeholder="e.g. Monthly, 1st Saturday"></label>
+    </div>
+    <label class="field"><span class="lbl">Members</span><div style="max-height:150px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;padding:8px 10px;">${memberChecklist}</div></label>
+    <label class="field"><span class="lbl">Goals</span><textarea id="f-ldggoals">${g?g.goals||'':''}</textarea></label>
+    <label class="field"><span class="lbl">Notes</span><textarea id="f-ldgnotes">${g?g.notes||'':''}</textarea></label>
+    <div class="modal-foot"><span>${g?`<button class="btn btn-danger" onclick="deleteLdg('${g.id}')">Delete</button>`:''}</span>
+      <span style="display:flex;gap:8px;"><button class="btn" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="saveLdg(${g?`'${g.id}'`:'null'})">Save</button></span></div>`;
+  openModal(html);
+}
+async function saveLdg(id){
+  const val=(x)=>document.getElementById(x).value;
+  const memberIds = Array.from(document.querySelectorAll(".ldg-member-cb:checked")).map(c=>c.value);
+  const data = {name: val("f-ldgname").trim()||"Untitled LDG", coachId: val("f-ldgcoach")||null, status: val("f-ldgstatus"), schedule: val("f-ldgschedule"), memberIds, goals: val("f-ldggoals"), notes: val("f-ldgnotes")};
+  if(id) Object.assign(STATE.ldgs.find(x=>x.id===id), data); else STATE.ldgs.push({id:uid("ldg"), ...data});
+  await persist(); closeModal(); showToast("LDG saved."); renderAll();
+}
+async function deleteLdg(id){ STATE.ldgs = STATE.ldgs.filter(g=>g.id!==id); await persist(); closeModal(); showToast("LDG deleted."); renderAll(); }
 
 /* =========================================================================
    DISTRICT & TEAM DASHBOARDS
@@ -2499,6 +2642,7 @@ function renderAll(){
   populateChurchFilters(); renderChurches();
   renderOrg();
   renderPipeline();
+  renderGenealogyTree(); renderLdgs();
   renderDistrictDashboard(); renderTeamDashboard(); renderProvinceDashboard();
   populateGrowthProvinceSelect(); renderGrowthAssessment(); renderGrowthMatrix(); renderGrowthFramework();
   renderLmsProgress(); renderModules(); renderPathways(); renderLearners(); renderAssessments(); renderCerts(); renderReadiness();
